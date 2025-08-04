@@ -1,0 +1,527 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes - GestorCloud{% endblock %}
+
+{% block page_title %}Reportes y Análisis{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card fade-in">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros de Reporte</h5>
+            </div>
+            <div class="card-body">
+                <form id="reportFilterForm">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="tipoReporte" class="form-label">Tipo de Reporte</label>
+                            <select class="form-select" id="tipoReporte" name="tipoReporte">
+                                <option value="ventas" selected>Ventas</option>
+                                <option value="clientes">Clientes</option>
+                                <option value="productos">Productos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+                            <input type="date" class="form-control" id="fechaInicio" name="fechaInicio">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="fechaFin" class="form-label">Fecha Fin</label>
+                            <input type="date" class="form-control" id="fechaFin" name="fechaFin">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="categoriaCliente" class="form-label">Categoría de Cliente</label>
+                            <select class="form-select" id="categoriaCliente" name="categoriaCliente">
+                                <option value="todos" selected>Todos</option>
+                                <option value="VIP">VIP</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Nuevo">Nuevo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="metodoPago" class="form-label">Método de Pago</label>
+                            <select class="form-select" id="metodoPago" name="metodoPago">
+                                <option value="todos" selected>Todos</option>
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="Tarjeta">Tarjeta de Crédito</option>
+                                <option value="Transferencia">Transferencia Bancaria</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="ordenarPor" class="form-label">Ordenar Por</label>
+                            <select class="form-select" id="ordenarPor" name="ordenarPor">
+                                <option value="fecha_desc" selected>Fecha (Más reciente)</option>
+                                <option value="fecha_asc">Fecha (Más antiguo)</option>
+                                <option value="monto_desc">Monto (Mayor a menor)</option>
+                                <option value="monto_asc">Monto (Menor a mayor)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="text-end mt-4">
+                        <button type="button" class="btn btn-primary" id="btnGenerarReporte">
+                            <i class="fas fa-chart-line me-2"></i>Generar Reporte
+                        </button>
+                        <button type="button" class="btn btn-outline-success ms-2" id="btnExportExcel">
+                            <i class="fas fa-file-excel me-2"></i>Exportar a Excel
+                        </button>
+                        <button type="button" class="btn btn-outline-danger ms-2" id="btnExportPDF">
+                            <i class="fas fa-file-pdf me-2"></i>Exportar a PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="reporteVentas" class="reporte-contenido fade-in">
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">$45,890</div>
+                <div class="stat-label">Ventas Totales</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card success">
+                <div class="stat-number">126</div>
+                <div class="stat-label">Transacciones</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card warning">
+                <div class="stat-number">$364.21</div>
+                <div class="stat-label">Promedio por Venta</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card danger">
+                <div class="stat-number">18%</div>
+                <div class="stat-label">Crecimiento</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Ventas por Período</h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary active">Semana</button>
+                        <button type="button" class="btn btn-outline-primary">Mes</button>
+                        <button type="button" class="btn btn-outline-primary">Año</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div style="height: 300px; position: relative;">
+                        <!-- Simulación del gráfico de ventas -->
+                        <div style="height: 300px; background: linear-gradient(to bottom, #f8fafc 0%, #f8fafc 100%); position: relative; border-radius: 8px;">
+                            <div style="position: absolute; bottom: 0; left: 0; width: 14%; height: 30%; background-color: #4f46e5; border-radius: 4px 4px 0 0; margin: 0 3%;"></div>
+                            <div style="position: absolute; bottom: 0; left: 20%; width: 14%; height: 50%; background-color: #4f46e5; border-radius: 4px 4px 0 0; margin: 0 3%;"></div>
+                            <div style="position: absolute; bottom: 0; left: 40%; width: 14%; height: 70%; background-color: #4f46e5; border-radius: 4px 4px 0 0; margin: 0 3%;"></div>
+                            <div style="position: absolute; bottom: 0; left: 60%; width: 14%; height: 40%; background-color: #4f46e5; border-radius: 4px 4px 0 0; margin: 0 3%;"></div>
+                            <div style="position: absolute; bottom: 0; left: 80%; width: 14%; height: 60%; background-color: #4f46e5; border-radius: 4px 4px 0 0; margin: 0 3%;"></div>
+                            <div style="position: absolute; top: 10px; left: 10px; color: #6b7280; font-size: 14px;">
+                                <div style="position: absolute; top: 260px; left: 0px; width: 100%; display: flex; justify-content: space-around;">
+                                    <div>Lun</div>
+                                    <div>Mar</div>
+                                    <div>Mié</div>
+                                    <div>Jue</div>
+                                    <div>Vie</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Ventas por Método de Pago</h5>
+                </div>
+                <div class="card-body">
+                    <div style="height: 300px; position: relative;">
+                        <!-- Simulación del gráfico circular -->
+                        <div style="width: 200px; height: 200px; border-radius: 50%; position: relative; margin: 0 auto;">
+                            <div style="position: absolute; width: 100%; height: 100%; background: conic-gradient(#4f46e5 0% 45%, #10b981 45% 75%, #f59e0b 75% 100%); border-radius: 50%;"></div>
+                            <div style="position: absolute; width: 60%; height: 60%; background-color: white; border-radius: 50%; top: 20%; left: 20%;"></div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fas fa-circle text-primary me-2"></i>Efectivo</span>
+                                <span class="fw-bold">45%</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fas fa-circle text-success me-2"></i>Tarjeta</span>
+                                <span class="fw-bold">30%</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-circle text-warning me-2"></i>Transferencia</span>
+                                <span class="fw-bold">25%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Detalles de Ventas</h5>
+                    <div class="input-group" style="width: 250px;">
+                        <input type="text" class="form-control" placeholder="Buscar...">
+                        <button class="btn btn-outline-primary" type="button"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Cliente</th>
+                                    <th>Productos</th>
+                                    <th>Valor Total</th>
+                                    <th>Método Pago</th>
+                                    <th>Vendedor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#1258</td>
+                                    <td>01/08/2025</td>
+                                    <td>Juan Pérez</td>
+                                    <td>Producto A, Producto B</td>
+                                    <td>$345.00</td>
+                                    <td>Efectivo</td>
+                                    <td>Ana González</td>
+                                </tr>
+                                <tr>
+                                    <td>#1257</td>
+                                    <td>01/08/2025</td>
+                                    <td>María López</td>
+                                    <td>Producto C</td>
+                                    <td>$120.00</td>
+                                    <td>Tarjeta</td>
+                                    <td>Carlos Ruiz</td>
+                                </tr>
+                                <tr>
+                                    <td>#1256</td>
+                                    <td>01/08/2025</td>
+                                    <td>Roberto Díaz</td>
+                                    <td>Producto A, Producto D</td>
+                                    <td>$280.00</td>
+                                    <td>Transferencia</td>
+                                    <td>Ana González</td>
+                                </tr>
+                                <tr>
+                                    <td>#1255</td>
+                                    <td>31/07/2025</td>
+                                    <td>Carlos Méndez</td>
+                                    <td>Producto B</td>
+                                    <td>$95.00</td>
+                                    <td>Efectivo</td>
+                                    <td>Carlos Ruiz</td>
+                                </tr>
+                                <tr>
+                                    <td>#1254</td>
+                                    <td>31/07/2025</td>
+                                    <td>Laura Torres</td>
+                                    <td>Producto C, Producto D</td>
+                                    <td>$220.00</td>
+                                    <td>Tarjeta</td>
+                                    <td>Ana González</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-end">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">Anterior</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Siguiente</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="reporteClientes" class="reporte-contenido d-none fade-in">
+    <!-- Contenido para reportes de clientes -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Clientes por Categoría</h5>
+                </div>
+                <div class="card-body">
+                    <div style="height: 250px; position: relative;">
+                        <!-- Simulación del gráfico de distribución de clientes -->
+                        <div style="width: 200px; height: 200px; border-radius: 50%; position: relative; margin: 0 auto;">
+                            <div style="position: absolute; width: 100%; height: 100%; background: conic-gradient(#4f46e5 0% 20%, #10b981 20% 70%, #f59e0b 70% 100%); border-radius: 50%;"></div>
+                            <div style="position: absolute; width: 60%; height: 60%; background-color: white; border-radius: 50%; top: 20%; left: 20%;"></div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fas fa-circle text-primary me-2"></i>VIP</span>
+                                <span class="fw-bold">20%</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fas fa-circle text-success me-2"></i>Regular</span>
+                                <span class="fw-bold">50%</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-circle text-warning me-2"></i>Nuevo</span>
+                                <span class="fw-bold">30%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Clientes Frecuentes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Compras</th>
+                                    <th>Total Gastado</th>
+                                    <th>Última Compra</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Juan Pérez</td>
+                                    <td>24</td>
+                                    <td>$5,240.00</td>
+                                    <td>01/08/2025</td>
+                                </tr>
+                                <tr>
+                                    <td>María López</td>
+                                    <td>18</td>
+                                    <td>$3,890.00</td>
+                                    <td>01/08/2025</td>
+                                </tr>
+                                <tr>
+                                    <td>Carlos Méndez</td>
+                                    <td>15</td>
+                                    <td>$3,100.00</td>
+                                    <td>31/07/2025</td>
+                                </tr>
+                                <tr>
+                                    <td>Laura Torres</td>
+                                    <td>12</td>
+                                    <td>$2,750.00</td>
+                                    <td>31/07/2025</td>
+                                </tr>
+                                <tr>
+                                    <td>Roberto Díaz</td>
+                                    <td>10</td>
+                                    <td>$2,180.00</td>
+                                    <td>01/08/2025</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="reporteProductos" class="reporte-contenido d-none fade-in">
+    <!-- Contenido para reportes de productos -->
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>Los datos mostrados son simulados para el ejemplo.
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Productos Más Vendidos</h5>
+                </div>
+                <div class="card-body">
+                    <div style="height: 250px; position: relative;">
+                        <!-- Simulación del gráfico de barras horizontales -->
+                        <div style="width: 100%; height: 200px; position: relative; margin-top: 20px;">
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="width: 70%; height: 25px; background-color: #4f46e5; border-radius: 4px;"></div>
+                                <span class="ms-2">Producto A (70%)</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="width: 55%; height: 25px; background-color: #10b981; border-radius: 4px;"></div>
+                                <span class="ms-2">Producto B (55%)</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="width: 45%; height: 25px; background-color: #f59e0b; border-radius: 4px;"></div>
+                                <span class="ms-2">Producto C (45%)</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div style="width: 35%; height: 25px; background-color: #ef4444; border-radius: 4px;"></div>
+                                <span class="ms-2">Producto D (35%)</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div style="width: 25%; height: 25px; background-color: #6366f1; border-radius: 4px;"></div>
+                                <span class="ms-2">Producto E (25%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Productos por Ingresos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Unidades</th>
+                                    <th>Precio Unidad</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Producto A</td>
+                                    <td>120</td>
+                                    <td>$45.00</td>
+                                    <td>$5,400.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Producto B</td>
+                                    <td>95</td>
+                                    <td>$35.00</td>
+                                    <td>$3,325.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Producto C</td>
+                                    <td>78</td>
+                                    <td>$50.00</td>
+                                    <td>$3,900.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Producto D</td>
+                                    <td>60</td>
+                                    <td>$40.00</td>
+                                    <td>$2,400.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Producto E</td>
+                                    <td>45</td>
+                                    <td>$60.00</td>
+                                    <td>$2,700.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Establecer fechas predeterminadas (mes actual)
+    window.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        
+        document.getElementById('fechaInicio').valueAsDate = firstDay;
+        document.getElementById('fechaFin').valueAsDate = lastDay;
+    });
+
+    // Manejar cambio del tipo de reporte
+    document.getElementById('tipoReporte').addEventListener('change', function() {
+        const tipoSeleccionado = this.value;
+        const reportes = document.querySelectorAll('.reporte-contenido');
+        
+        reportes.forEach(reporte => {
+            reporte.classList.add('d-none');
+        });
+        
+        document.getElementById('reporte' + tipoSeleccionado.charAt(0).toUpperCase() + tipoSeleccionado.slice(1)).classList.remove('d-none');
+    });
+    
+    // Generar reporte
+    document.getElementById('btnGenerarReporte').addEventListener('click', function() {
+        const button = this;
+        const originalText = showLoading(button);
+        
+        // Simulamos la generación del reporte
+        setTimeout(() => {
+            hideLoading(button, originalText);
+            showToast('Reporte generado correctamente', 'success');
+        }, 1200);
+    });
+    
+    // Exportar a Excel
+    document.getElementById('btnExportExcel').addEventListener('click', function() {
+        const button = this;
+        const originalText = showLoading(button);
+        
+        // Simulamos la exportación
+        setTimeout(() => {
+            hideLoading(button, originalText);
+            showToast('Reporte exportado a Excel correctamente', 'success');
+            
+            // Simulación de descarga
+            const link = document.createElement('a');
+            link.download = 'reporte_gestorcloud_' + new Date().toISOString().split('T')[0] + '.xlsx';
+            link.href = '#';
+            link.click();
+        }, 1500);
+    });
+    
+    // Exportar a PDF
+    document.getElementById('btnExportPDF').addEventListener('click', function() {
+        const button = this;
+        const originalText = showLoading(button);
+        
+        // Simulamos la exportación
+        setTimeout(() => {
+            hideLoading(button, originalText);
+            showToast('Reporte exportado a PDF correctamente', 'success');
+            
+            // Simulación de descarga
+            const link = document.createElement('a');
+            link.download = 'reporte_gestorcloud_' + new Date().toISOString().split('T')[0] + '.pdf';
+            link.href = '#';
+            link.click();
+        }, 1500);
+    });
+</script>
+{% endblock %}

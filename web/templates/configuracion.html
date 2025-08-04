@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración - GestorCloud{% endblock %}
+
+{% block page_title %}Configuración del Sistema{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card fade-in">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Configuración General</h5>
+            </div>
+            <div class="card-body">
+                <form id="configForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="nombreNegocio" class="form-label">Nombre del Negocio</label>
+                            <input type="text" class="form-control" id="nombreNegocio" name="nombreNegocio" value="Mi Negocio">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="emailContacto" class="form-label">Email de Contacto</label>
+                            <input type="email" class="form-control" id="emailContacto" name="emailContacto" value="contacto@minegocio.com">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="direccionNegocio" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="direccionNegocio" name="direccionNegocio" value="Calle Principal #123">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="telefonoContacto" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="telefonoContacto" name="telefonoContacto" value="+1234567890">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3">Configuración de Ventas</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="moneda" class="form-label">Moneda</label>
+                            <select class="form-select" id="moneda" name="moneda">
+                                <option value="USD" selected>Dólar (USD)</option>
+                                <option value="EUR">Euro (EUR)</option>
+                                <option value="MXN">Peso Mexicano (MXN)</option>
+                                <option value="COP">Peso Colombiano (COP)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="impuesto" class="form-label">Impuesto (%)</label>
+                            <input type="number" class="form-control" id="impuesto" name="impuesto" value="16">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="descuentoAutomatico" checked>
+                                <label class="form-check-label" for="descuentoAutomatico">Aplicar descuento automático a clientes frecuentes</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="notificaciones" checked>
+                                <label class="form-check-label" for="notificaciones">Notificaciones por email</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3">Copia de Seguridad</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-primary" id="btnBackup">
+                                <i class="fas fa-download me-2"></i>Generar Copia de Seguridad
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="fileRestore">
+                                <button class="btn btn-outline-primary" type="button" id="btnRestore">
+                                    <i class="fas fa-upload me-2"></i>Restaurar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-4">
+                        <button type="button" class="btn btn-secondary me-2">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="btnSaveConfig">
+                            <i class="fas fa-save me-2"></i>Guardar Configuración
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card fade-in">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users-cog me-2"></i>Perfiles de Usuario</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>admin@gestorcloud.com</td>
+                                <td><span class="badge bg-primary">Administrador</span></td>
+                                <td><span class="badge bg-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>vendedor@gestorcloud.com</td>
+                                <td><span class="badge bg-info">Vendedor</span></td>
+                                <td><span class="badge bg-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn btn-primary mt-3">
+                    <i class="fas fa-plus me-2"></i>Añadir Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card fade-in">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Seguridad</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h6>Cambio de Contraseña</h6>
+                    <div class="mb-3">
+                        <label for="passwordActual" class="form-label">Contraseña Actual</label>
+                        <input type="password" class="form-control" id="passwordActual">
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordNueva" class="form-label">Nueva Contraseña</label>
+                        <input type="password" class="form-control" id="passwordNueva">
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordConfirmar" class="form-label">Confirmar Contraseña</label>
+                        <input type="password" class="form-control" id="passwordConfirmar">
+                    </div>
+                    <button class="btn btn-primary">Cambiar Contraseña</button>
+                </div>
+                <hr>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="loginSeguro" checked>
+                    <label class="form-check-label" for="loginSeguro">Inicios de sesión seguros (2FA)</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="historialAccesos" checked>
+                    <label class="form-check-label" for="historialAccesos">Mantener historial de accesos</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Guardar configuración
+    document.getElementById('btnSaveConfig').addEventListener('click', function() {
+        const button = this;
+        const originalText = showLoading(button);
+        
+        // Simular guardado (aquí iría la llamada AJAX real)
+        setTimeout(() => {
+            hideLoading(button, originalText);
+            showToast('Configuración guardada correctamente', 'success');
+        }, 1000);
+    });
+    
+    // Copia de seguridad
+    document.getElementById('btnBackup').addEventListener('click', function() {
+        const button = this;
+        const originalText = showLoading(button);
+        
+        // Simular proceso de backup
+        setTimeout(() => {
+            hideLoading(button, originalText);
+            showToast('Copia de seguridad generada correctamente', 'success');
+            
+            // Simulación de descarga
+            const link = document.createElement('a');
+            link.download = 'gestorcloud_backup_' + new Date().toISOString().split('T')[0] + '.bak';
+            link.href = '#';
+            link.click();
+        }, 2000);
+    });
+    
+    // Restaurar copia de seguridad
+    document.getElementById('btnRestore').addEventListener('click', function() {
+        const fileInput = document.getElementById('fileRestore');
+        
+        if (fileInput.files.length === 0) {
+            showToast('Por favor seleccione un archivo de respaldo', 'warning');
+            return;
+        }
+        
+        if (confirm('¿Está seguro de restaurar desde la copia de seguridad? Esta acción reemplazará los datos actuales.')) {
+            const button = this;
+            const originalText = showLoading(button);
+            
+            // Simular proceso de restauración
+            setTimeout(() => {
+                hideLoading(button, originalText);
+                showToast('Restauración completada correctamente', 'success');
+            }, 2000);
+        }
+    });
+</script>
+{% endblock %}

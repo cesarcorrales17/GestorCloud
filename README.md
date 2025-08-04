@@ -15,6 +15,7 @@
 - 👥 **Gestión Completa de Clientes**: Registro, búsqueda, edición y categorización
 - 💰 **Control de Ventas**: Registro de transacciones con historial detallado
 - 📊 **Reportes y Estadísticas**: Dashboard con métricas importantes del negocio
+- ⚙️ **Configuración del Sistema**: Personalización de negocio y preferencias
 - 🌟 **Sistema VIP**: Descuentos automáticos para clientes premium
 - 💾 **Persistencia de Datos**: Base de datos SQLite local
 - 🔒 **Validaciones Robustas**: Email, teléfono y datos empresariales
@@ -70,6 +71,8 @@ Luego abre tu navegador en: **http://localhost:8000**
 - 📊 **Dashboard interactivo** con estadísticas en tiempo real
 - 👥 **Gestión visual de clientes** con búsqueda y filtros
 - 💰 **Registro de ventas** con interfaz intuitiva
+- 📊 **Sistema de reportes** con filtros avanzados y exportación
+- ⚙️ **Panel de configuración** para personalizar el sistema
 - 📱 **Diseño responsive** para móvil y tablet
 - 🎨 **Interfaz moderna** con animaciones suaves
 - 🔍 **Búsqueda en tiempo real** y filtros avanzados
@@ -126,7 +129,14 @@ GestorCloud/
 │   │   ├── base.html   # Layout base
 │   │   ├── dashboard.html
 │   │   ├── clientes.html
-│   │   └── cliente_form.html
+│   │   ├── cliente_form.html
+│   │   ├── cliente_detalle.html
+│   │   ├── ventas.html
+│   │   ├── ventas_hoy.html
+│   │   ├── venta_form.html
+│   │   ├── venta_detalle.html
+│   │   ├── reportes.html
+│   │   └── configuracion.html
 │   └── static/         # Archivos estáticos
 │       ├── css/        # Estilos personalizados
 │       ├── js/         # JavaScript
@@ -217,17 +227,24 @@ GestorCloud incluye un sistema de reportes que muestra:
 
 ## 🚧 Roadmap
 
-### Versión 1.1 (Próximamente)
-- [ ] 🌐 Interfaz web con FastAPI
-- [ ] 📱 Diseño responsive
-- [ ] 📧 Envío de emails automáticos
-- [ ] 📊 Gráficos interactivos
+### Versión 1.1 (Actual)
+- [x] 🌐 Interfaz web con FastAPI
+- [x] 📱 Diseño responsive
+- [x] ⚙️ Panel de configuración del sistema
+- [x] 📊 Sistema de reportes y análisis
+- [ ] 🌓 Modo claro/oscuro
 
-### Versión 1.2 (Futuro)
+### Versión 1.2 (Próximamente)
+- [ ] 🔐 Sistema de autenticación de usuarios
+- [ ] 📧 Envío de emails automáticos
+- [ ] 📊 Gráficos interactivos avanzados
+- [ ] 💾 Sistema de respaldo y restauración
+
+### Versión 1.3 (Futuro)
 - [ ] 📅 Sistema de citas y recordatorios
 - [ ] 💳 Integración con pasarelas de pago
 - [ ] 📱 API REST completa
-- [ ] 🔐 Sistema de usuarios y roles
+- [ ] 🔐 Gestión avanzada de roles y permisos
 
 ### Versión 2.0 (Visión)
 - [ ] ☁️ Versión SaaS multi-empresa

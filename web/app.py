@@ -222,6 +222,18 @@ async def ventas_hoy(request: Request):
         "page": "ventas_hoy"  # Changed to ventas_hoy to highlight in navbar
     })
 
+@app.get("/ventas/nueva", response_class=HTMLResponse)
+async def nueva_venta_form(request: Request):
+    """Formulario para nueva venta"""
+    clientes = db.obtener_todos_clientes()
+    
+    return templates.TemplateResponse("venta_form.html", {
+        "request": request,
+        "clientes": clientes,
+        "metodos_pago": METODOS_PAGO,
+        "page": "ventas"
+    })
+
 @app.get("/ventas/{venta_id}", response_class=HTMLResponse)
 async def detalle_venta(request: Request, venta_id: int):
     """Página de detalle de una venta"""
@@ -239,8 +251,6 @@ async def detalle_venta(request: Request, venta_id: int):
         "venta": venta,
         "page": "ventas"
     })
-
-@app.get("/ventas/nueva", response_class=HTMLResponse)
 async def nueva_venta_form(request: Request):
     """Formulario para nueva venta"""
     clientes = db.obtener_todos_clientes()
@@ -250,6 +260,30 @@ async def nueva_venta_form(request: Request):
         "clientes": clientes,
         "metodos_pago": METODOS_PAGO,
         "page": "ventas"
+    })
+
+@app.get("/configuracion", response_class=HTMLResponse)
+async def configuracion_page(request: Request):
+    """Página de configuración del sistema"""
+    return templates.TemplateResponse("configuracion.html", {
+        "request": request,
+        "page": "configuracion"
+    })
+
+@app.get("/reportes", response_class=HTMLResponse)
+async def reportes_page(request: Request):
+    """Página de reportes y análisis"""
+    # Obtener datos necesarios para los reportes
+    ventas = db.obtener_todas_ventas()
+    clientes = db.obtener_todos_clientes()
+    stats = db.obtener_estadisticas_generales()
+    
+    return templates.TemplateResponse("reportes.html", {
+        "request": request,
+        "ventas": ventas,
+        "clientes": clientes,
+        "stats": stats,
+        "page": "reportes"
     })
 
 # ===== API ENDPOINTS =====
