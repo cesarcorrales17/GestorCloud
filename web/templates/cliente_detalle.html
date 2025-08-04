@@ -209,11 +209,42 @@ function eliminarCliente(clienteId) {
     const modal = new bootstrap.Modal(document.getElementById('eliminarClienteModal'));
     modal.show();
     
-    document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
-        // Aquí iría el código para eliminar
-        // Por ahora solo simulamos
-        showToast('Cliente eliminado correctamente', 'success');
-        setTimeout(() => { window.location.href = '/clientes'; }, 1500);
+    // Eliminar listeners previos para evitar duplicados
+    const btnEliminar = document.getElementById('btnConfirmarEliminar');
+    const nuevoBtn = btnEliminar.cloneNode(true);
+    btnEliminar.parentNode.replaceChild(nuevoBtn, btnEliminar);
+    
+    nuevoBtn.addEventListener('click', async function() {
+        try {
+            const response = await fetch(`/api/clientes/${clienteId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showToast('Cliente eliminado correctamente', 'success');
+                setTimeout(() => { window.location.href = '/clientes'; }, 1500);
+            } else {
+                // Si el error es por ventas registradas, mostramos un mensaje más amigable
+                if (data.message.includes("ventas registradas")) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('eliminarClienteModal'));
+                    modal.hide();
+                    
+                    // Mostrar mensaje más detallado después de cerrar el modal
+                    setTimeout(() => {
+                        showToast('No se puede eliminar un cliente con ventas registradas. Puedes cambiar su estado a "Inactivo" en su lugar.', 'warning');
+                    }, 500);
+                } else {
+                    showToast(`Error: ${data.message}`, 'danger');
+                }
+            }
+        } catch (error) {
+            showToast(`Error de conexión: ${error}`, 'danger');
+        }
     });
 }
 

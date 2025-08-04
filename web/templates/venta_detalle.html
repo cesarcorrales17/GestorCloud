@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Venta #{{ venta.id_venta }} - GestorCloud{% endblock %}
+
+{% block page_title %}Detalle de Venta{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Botones de acción -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <a href="/ventas" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Volver a Ventas
+            </a>
+        </div>
+        <div class="col-md-6 text-end">
+            <button class="btn btn-primary" onclick="imprimirFactura()">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+            <button class="btn btn-outline-secondary" onclick="exportarFactura()">
+                <i class="fas fa-file-export"></i> Exportar
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información principal de la venta -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-shopping-cart"></i> Detalle de Venta #{{ venta.id_venta }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="text-muted">Información General</h5>
+                            <p><strong>Fecha:</strong> {{ venta.fecha_venta }}</p>
+                            <p><strong>Hora:</strong> {{ venta.hora_venta }}</p>
+                            <p><strong>Método de Pago:</strong> {{ venta.metodo_pago }}</p>
+                            <p><strong>Vendedor:</strong> {{ venta.vendedor or "No especificado" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-muted">Cliente</h5>
+                            <p>
+                                <strong>Nombre:</strong> 
+                                <a href="/clientes/{{ venta.id_cliente }}">
+                                    {{ venta.cliente.nombre_completo }}
+                                </a>
+                                {% if venta.cliente.categoria == 'VIP' %}
+                                <span class="badge bg-warning text-dark ms-2">VIP</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Correo:</strong> {{ venta.cliente.correo }}</p>
+                        </div>
+                    </div>
+
+                    <h5 class="text-muted mb-3">Detalle de Productos</h5>
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <p class="mb-0">{{ venta.productos }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if venta.notas_venta %}
+                            <div class="alert alert-info">
+                                <strong>Notas:</strong> {{ venta.notas_venta }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Subtotal:</span>
+                                        <span>${{ "{:,.0f}".format(venta.valor_total + venta.descuento_aplicado) }}</span>
+                                    </div>
+                                    {% if venta.descuento_aplicado > 0 %}
+                                    <div class="d-flex justify-content-between mb-2 text-danger">
+                                        <span>Descuento:</span>
+                                        <span>-${{ "{:,.0f}".format(venta.descuento_aplicado) }}</span>
+                                    </div>
+                                    {% endif %}
+                                    <hr>
+                                    <div class="d-flex justify-content-between fw-bold">
+                                        <span>Total:</span>
+                                        <span class="text-success">${{ "{:,.0f}".format(venta.valor_total) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral con acciones y estadísticas -->
+        <div class="col-md-4">
+            <!-- Acciones rápidas -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/ventas/nueva" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Nueva Venta
+                        </a>
+                        <a href="/clientes/{{ venta.id_cliente }}" class="btn btn-outline-primary">
+                            <i class="fas fa-user"></i> Ver Cliente
+                        </a>
+                        <button class="btn btn-outline-secondary" onclick="enviarComprobante()">
+                            <i class="fas fa-envelope"></i> Enviar Comprobante
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos adicionales -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información Adicional</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID de Transacción:</strong> #{{ venta.id_venta }}</p>
+                    <p><strong>Registrado en:</strong> {{ venta.fecha_venta }}</p>
+                    <p><strong>Estado:</strong> <span class="badge bg-success">Completado</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function imprimirFactura() {
+    window.print();
+}
+
+function exportarFactura() {
+    // Simulación de exportación
+    showToast('Exportando factura...', 'info');
+}
+
+function enviarComprobante() {
+    // Simulación de envío de comprobante
+    showToast(`Enviando comprobante a ${venta.cliente.correo}...`, 'info');
+}
+
+// Función para mostrar toast (si no está definida en base.html)
+function showToast(message, type) {
+    const toast = document.getElementById("liveToast");
+    if (toast) {
+        const toastBody = toast.querySelector(".toast-body");
+        toastBody.textContent = message;
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+    } else {
+        alert(message);
+    }
+}
+</script>
+{% endblock %}

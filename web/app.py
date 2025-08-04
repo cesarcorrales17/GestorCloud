@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from typing import Optional, List
+from datetime import datetime
 import uvicorn
 import sys
 import os
@@ -85,6 +86,100 @@ async def detalle_cliente(request: Request, cliente_id: int):
         "page": "clientes"
     })
 
+@app.get("/clientes/{cliente_id}/editar", response_class=HTMLResponse)
+async def editar_cliente_form(request: Request, cliente_id: int):
+    """Formulario para editar cliente"""
+    cliente = db.obtener_cliente(cliente_id)
+    if not cliente:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    
+    return templates.TemplateResponse("cliente_form.html", {
+        "request": request,
+        "cliente": cliente,
+        "categorias": CATEGORIAS_CLIENTE,
+        "estados": ESTADOS_CLIENTE,
+        "page": "clientes",
+        "action": "editar"
+    })
+
+@app.post("/api/clientes/{cliente_id}")
+async def actualizar_cliente(
+    cliente_id: int,
+    nombre_completo: str = Form(...),
+    edad: int = Form(...),
+    direccion: str = Form(...),
+    correo: str = Form(...),
+    telefono: str = Form(...),
+    empresa: str = Form(""),
+    categoria: str = Form("Regular"),
+    estado: str = Form("Activo"),
+    notas: str = Form("")
+):
+    """API para actualizar un cliente"""
+    try:
+        # Obtener cliente existente
+        cliente_existente = db.obtener_cliente(cliente_id)
+        if not cliente_existente:
+            raise HTTPException(status_code=404, detail="Cliente no encontrado")
+        
+        # Actualizar datos
+        cliente_existente.nombre_completo = nombre_completo
+        cliente_existente.edad = edad
+        cliente_existente.direccion = direccion
+        cliente_existente.correo = correo
+        cliente_existente.telefono = telefono
+        cliente_existente.empresa = empresa
+        cliente_existente.categoria = categoria
+        cliente_existente.estado = estado
+        cliente_existente.notas = notas
+        
+        # Guardar cambios
+        db.actualizar_cliente(cliente_existente)
+        
+        return JSONResponse({
+            "success": True,
+            "message": "Cliente actualizado exitosamente",
+            "cliente_id": cliente_id
+        })
+        
+    except ValueError as e:
+        return JSONResponse({
+            "success": False,
+            "message": str(e)
+        }, status_code=400)
+    except Exception as e:
+        return JSONResponse({
+            "success": False,
+            "message": f"Error inesperado: {str(e)}"
+        }, status_code=500)
+
+@app.delete("/api/clientes/{cliente_id}")
+async def eliminar_cliente_api(cliente_id: int):
+    """API para eliminar un cliente"""
+    try:
+        # Intentar eliminar el cliente
+        result = db.eliminar_cliente(cliente_id)
+        if result:
+            return JSONResponse({
+                "success": True,
+                "message": "Cliente eliminado exitosamente"
+            })
+        else:
+            return JSONResponse({
+                "success": False,
+                "message": "No se pudo eliminar el cliente"
+            }, status_code=400)
+    except ValueError as e:
+        return JSONResponse({
+            "success": False,
+            "message": str(e)
+        }, status_code=400)
+    except Exception as e:
+        return JSONResponse({
+            "success": False,
+            "message": f"Error inesperado: {str(e)}"
+        }, status_code=500)
+
 @app.get("/ventas", response_class=HTMLResponse)
 async def lista_ventas(request: Request):
     """Página de gestión de ventas"""
@@ -96,6 +191,52 @@ async def lista_ventas(request: Request):
         "request": request,
         "ventas": ventas,
         "stats": stats,
+        "page": "ventas"
+    })
+
+@app.get("/ventas/hoy", response_class=HTMLResponse)
+async def ventas_hoy(request: Request):
+    """Página de ventas del día actual"""
+    # Obtener fecha actual
+    fecha_actual = datetime.now().strftime("%Y-%m-%d")
+    
+    # Obtener las ventas del día usando nuestro nuevo método optimizado
+    ventas_del_dia = db.obtener_ventas_del_dia(fecha_actual)
+    
+    # Calcular estadísticas del día
+    total_ventas = len(ventas_del_dia)
+    ingresos_dia = sum(v.valor_total for v in ventas_del_dia)
+    promedio_venta = ingresos_dia / total_ventas if total_ventas > 0 else 0
+    
+    stats_dia = {
+        'total_ventas': total_ventas,
+        'ingresos_dia': float(ingresos_dia),
+        'promedio_venta': float(promedio_venta),
+        'fecha': fecha_actual
+    }
+    
+    return templates.TemplateResponse("ventas_hoy.html", {
+        "request": request,
+        "ventas": ventas_del_dia,
+        "stats": stats_dia,
+        "page": "ventas_hoy"  # Changed to ventas_hoy to highlight in navbar
+    })
+
+@app.get("/ventas/{venta_id}", response_class=HTMLResponse)
+async def detalle_venta(request: Request, venta_id: int):
+    """Página de detalle de una venta"""
+    # Obtener todas las ventas
+    ventas = db.obtener_todas_ventas()
+    
+    # Encontrar la venta específica
+    venta = next((v for v in ventas if v.id_venta == venta_id), None)
+    
+    if not venta:
+        raise HTTPException(status_code=404, detail="Venta no encontrada")
+    
+    return templates.TemplateResponse("venta_detalle.html", {
+        "request": request,
+        "venta": venta,
         "page": "ventas"
     })
 

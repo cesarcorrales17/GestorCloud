@@ -23,7 +23,7 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{% if cliente %}/clientes/{{ cliente.id }}/editar{% else %}/clientes/nuevo{% endif %}">
+                    <form id="clienteForm" onsubmit="handleSubmit(event)">
                         <div class="row">
                             <!-- Información Personal -->
                             <div class="col-md-6">
@@ -163,44 +163,97 @@
 </div>
 
 <script>
-// Validación de formulario
+// Validación y manejo de formulario
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    
-    form.addEventListener('submit', function(e) {
-        const nombre = document.getElementById('nombre_completo').value.trim();
-        const edad = document.getElementById('edad').value;
-        const correo = document.getElementById('correo').value.trim();
-        const telefono = document.getElementById('telefono').value.trim();
-        
-        if (!nombre || !edad || !correo || !telefono) {
-            e.preventDefault();
-            alert('Por favor completa todos los campos obligatorios');
-            return false;
+    // Inicializar toast si existe
+    window.showToast = function(message, type = 'info') {
+        const toast = document.getElementById("liveToast");
+        if (toast) {
+            const toastBody = toast.querySelector(".toast-body");
+            toastBody.textContent = message;
+            toast.className = toast.className.replace(/bg-\w+/, `bg-${type}`);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        } else {
+            alert(message);
         }
-        
-        if (edad < 1 || edad > 120) {
-            e.preventDefault();
-            alert('La edad debe estar entre 1 y 120 años');
-            return false;
-        }
-        
-        // Validación básica de email
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(correo)) {
-            e.preventDefault();
-            alert('Por favor ingresa un correo electrónico válido');
-            return false;
-        }
-        
-        // Validación básica de teléfono (números y algunos caracteres especiales)
-        const telefonoPattern = /^[\d\s\-\+\(\)]+$/;
-        if (!telefonoPattern.test(telefono)) {
-            e.preventDefault();
-            alert('Por favor ingresa un número de teléfono válido');
-            return false;
-        }
-    });
+    };
 });
+
+// Función para manejar el envío del formulario
+async function handleSubmit(e) {
+    e.preventDefault();
+    
+    // Validar campos
+    const nombre = document.getElementById('nombre_completo').value.trim();
+    const edad = document.getElementById('edad').value;
+    const direccion = document.getElementById('direccion').value.trim();
+    const correo = document.getElementById('correo').value.trim();
+    const telefono = document.getElementById('telefono').value.trim();
+    
+    // Validaciones básicas
+    if (!nombre || !edad || !direccion || !correo || !telefono) {
+        showToast('Por favor completa todos los campos obligatorios', 'danger');
+        return false;
+    }
+    
+    if (edad < 1 || edad > 120) {
+        showToast('La edad debe estar entre 1 y 120 años', 'danger');
+        return false;
+    }
+    
+    // Validación básica de email
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(correo)) {
+        showToast('Por favor ingresa un correo electrónico válido', 'danger');
+        return false;
+    }
+    
+    // Validación básica de teléfono (números y algunos caracteres especiales)
+    const telefonoPattern = /^[\d\s\-\+\(\)]+$/;
+    if (!telefonoPattern.test(telefono)) {
+        showToast('Por favor ingresa un número de teléfono válido', 'danger');
+        return false;
+    }
+    
+    // Preparar FormData para el envío
+    const formData = new FormData(document.getElementById('clienteForm'));
+    
+    try {
+        // Determinar si es crear o editar
+        {% if cliente %}
+        const clienteId = {{ cliente.id_cliente }};
+        const url = `/api/clientes/${clienteId}`;
+        const method = 'POST';
+        {% else %}
+        const url = '/api/clientes';
+        const method = 'POST';
+        {% endif %}
+        
+        // Enviar petición
+        const response = await fetch(url, {
+            method: method,
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast(data.message, 'success');
+            // Redireccionar después de un breve delay
+            setTimeout(() => {
+                {% if cliente %}
+                window.location.href = `/clientes/${clienteId}`;
+                {% else %}
+                window.location.href = `/clientes/${data.cliente_id}`;
+                {% endif %}
+            }, 1500);
+        } else {
+            showToast(`Error: ${data.message}`, 'danger');
+        }
+    } catch (error) {
+        showToast(`Error de conexión: ${error}`, 'danger');
+    }
+}
 </script>
 {% endblock %}
