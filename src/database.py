@@ -311,6 +311,77 @@ class GestorCloudDB:
         )
         venta.id_venta = row[0]
         return venta
+        
+    def obtener_todas_ventas(self) -> List[Venta]:
+        """Obtiene todas las ventas registradas en el sistema"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Unir con tabla clientes para obtener información del cliente
+            cursor.execute("""
+                SELECT v.*, c.nombre_completo, c.correo, c.categoria
+                FROM ventas v
+                LEFT JOIN clientes c ON v.id_cliente = c.id_cliente
+                ORDER BY v.fecha_venta DESC, v.hora_venta DESC
+            """)
+            
+            rows = cursor.fetchall()
+            ventas = []
+            
+            for row in rows:  # Corregido: usar rows en lugar de fetchall() de nuevo
+                venta = Venta(
+                    id_cliente=row[1],
+                    fecha_venta=row[2],
+                    hora_venta=row[3],
+                    productos=row[4],
+                    valor_total=row[5],
+                    descuento_aplicado=row[6],
+                    metodo_pago=row[7],
+                    vendedor=row[8],
+                    notas_venta=row[9]
+                )
+                venta.id_venta = row[0]
+                
+                # Añadir información del cliente
+                venta.cliente = {
+                    'nombre_completo': row[10] if row[10] else 'Cliente eliminado',
+                    'correo': row[11] if row[11] else '',
+                    'categoria': row[12] if row[12] else ''
+                }
+                
+                ventas.append(venta)
+                
+            return ventas
+            
+    def obtener_estadisticas_ventas(self) -> dict:
+        """Obtiene estadísticas específicas para la página de ventas"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Total de ventas
+            cursor.execute("SELECT COUNT(*) FROM ventas")
+            total_ventas = cursor.fetchone()[0]
+            
+            # Ventas e ingresos del mes actual
+            mes_actual = datetime.now().strftime("%Y-%m")
+            cursor.execute(
+                "SELECT COUNT(*), COALESCE(SUM(valor_total), 0) FROM ventas WHERE fecha_venta LIKE ?",
+                (f"{mes_actual}%",)
+            )
+            result = cursor.fetchone()
+            ventas_mes = result[0] or 0
+            ingresos_mes = result[1] or 0
+            
+            # Promedio por venta
+            cursor.execute("SELECT COALESCE(AVG(valor_total), 0) FROM ventas")
+            promedio_venta = cursor.fetchone()[0] or 0
+            
+            return {
+                'total_ventas': total_ventas,
+                'ventas_mes': ventas_mes,
+                'ingresos_mes': float(ingresos_mes),
+                'promedio_venta': float(promedio_venta)
+            }
     
     def hacer_backup(self, archivo_backup: str = None) -> str:
         """Crea un backup de la base de datos"""

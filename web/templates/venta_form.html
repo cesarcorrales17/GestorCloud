@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Venta - GestorCloud{% endblock %}
+
+{% block page_title %}Registrar Nueva Venta{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Formulario de Venta -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0"><i class="fas fa-shopping-cart"></i> Detalles de la Venta</h4>
+        </div>
+        <div class="card-body">
+            <form id="ventaForm" method="post" action="/api/ventas">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="id_cliente" class="form-label">Cliente <span class="text-danger">*</span></label>
+                        <select class="form-select" id="id_cliente" name="id_cliente" required>
+                            <option value="">Seleccionar cliente...</option>
+                            {% for cliente in clientes %}
+                            <option value="{{ cliente.id_cliente }}">{{ cliente.nombre_completo }} {% if cliente.empresa %}({{ cliente.empresa }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="client-info border rounded p-3 mt-4" id="clienteInfo" style="display:none;">
+                            <div id="clienteNombre" class="fs-5 fw-bold"></div>
+                            <div id="clienteCorreo" class="text-muted small"></div>
+                            <div class="mt-2">
+                                <span id="clienteCategoria" class="badge bg-secondary me-2"></span>
+                                <span id="clienteDescuento" class="badge bg-success"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label for="productos" class="form-label">Productos/Servicios <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="productos" name="productos" rows="3" required 
+                                placeholder="Detalla los productos o servicios incluidos en esta venta..."></textarea>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label for="valor_total" class="form-label">Valor Total <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="valor_total" name="valor_total" min="1000" step="1000" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="descuento_aplicado" class="form-label">Descuento (%)</label>
+                        <input type="number" class="form-control" id="descuento_aplicado" name="descuento_aplicado" min="0" max="100" value="0" step="0.1">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="metodo_pago" class="form-label">Método de Pago <span class="text-danger">*</span></label>
+                        <select class="form-select" id="metodo_pago" name="metodo_pago" required>
+                            {% for metodo in metodos_pago %}
+                            <option value="{{ metodo }}">{{ metodo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="vendedor" class="form-label">Vendedor</label>
+                        <input type="text" class="form-control" id="vendedor" name="vendedor">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="notas_venta" class="form-label">Notas Adicionales</label>
+                        <textarea class="form-control" id="notas_venta" name="notas_venta" rows="1" 
+                                placeholder="Observaciones o detalles adicionales..."></textarea>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <a href="/ventas" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button type="submit" class="btn btn-success btn-lg" id="btnRegistrarVenta">
+                            <i class="fas fa-check"></i> Registrar Venta
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('ventaForm');
+    const clienteSelect = document.getElementById('id_cliente');
+    const clienteInfo = document.getElementById('clienteInfo');
+    const clienteNombre = document.getElementById('clienteNombre');
+    const clienteCorreo = document.getElementById('clienteCorreo');
+    const clienteCategoria = document.getElementById('clienteCategoria');
+    const clienteDescuento = document.getElementById('clienteDescuento');
+    const descuentoInput = document.getElementById('descuento_aplicado');
+
+    // Mostrar información del cliente al seleccionarlo
+    clienteSelect.addEventListener('change', function() {
+        if (this.value) {
+            // En un caso real, haríamos una petición al servidor
+            // Para simplificar, obtenemos el texto seleccionado
+            const selectedOption = this.options[this.selectedIndex];
+            const clienteNombreText = selectedOption.text;
+            
+            // Mostrar la información del cliente (simulado)
+            clienteNombre.textContent = clienteNombreText;
+            clienteCorreo.textContent = "correo@cliente.com"; // Esto en realidad vendría del servidor
+            clienteCategoria.textContent = "Regular";  // Esto vendría del servidor
+            clienteDescuento.textContent = "0% Descuento"; // Esto vendría del servidor
+            
+            // Mostrar el panel de información
+            clienteInfo.style.display = 'block';
+            
+            // Aquí se haría una petición AJAX para obtener datos completos del cliente
+            // Por ejemplo:
+            /*
+            fetch(`/api/clientes/${this.value}`)
+                .then(response => response.json())
+                .then(data => {
+                    clienteNombre.textContent = data.nombre_completo;
+                    clienteCorreo.textContent = data.correo;
+                    clienteCategoria.textContent = data.categoria;
+                    
+                    // Si es VIP, mostrar su descuento automáticamente
+                    if (data.categoria === 'VIP') {
+                        clienteCategoria.classList.add('bg-warning');
+                        clienteCategoria.classList.remove('bg-secondary');
+                        clienteDescuento.textContent = `${data.descuento_cliente * 100}% Descuento`;
+                        descuentoInput.value = data.descuento_cliente * 100;
+                    }
+                    
+                    clienteInfo.style.display = 'block';
+                });
+            */
+        } else {
+            clienteInfo.style.display = 'none';
+        }
+    });
+
+    // Envío del formulario
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const submitButton = document.getElementById('btnRegistrarVenta');
+        const originalButtonText = submitButton.innerHTML;
+        
+        // Mostrar loading
+        submitButton.innerHTML = '<span class="spinner me-2"></span>Procesando...';
+        submitButton.disabled = true;
+        
+        // Enviar formulario mediante fetch
+        fetch('/api/ventas', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostrar mensaje de éxito
+                showToast('Venta registrada exitosamente', 'success');
+                
+                // Redireccionar después de 1 segundo
+                setTimeout(() => {
+                    window.location.href = '/ventas';
+                }, 1000);
+            } else {
+                // Mostrar error
+                showToast(data.message || 'Error al registrar venta', 'error');
+                submitButton.innerHTML = originalButtonText;
+                submitButton.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Error al conectar con el servidor', 'error');
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+        });
+    });
+
+    function showToast(message, type) {
+        // Usar la función global definida en base.html
+        window.showToast?.(message, type) || 
+            alert(message); // Fallback si la función global no está definida
+    }
+});
+</script>
+{% endblock %}

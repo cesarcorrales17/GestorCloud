@@ -116,13 +116,13 @@
                     </thead>
                     <tbody>
                         {% for venta in ventas %}
-                        <tr data-metodo="{{ venta.metodo_pago }}" data-fecha="{{ venta.fecha.strftime('%Y-%m-%d') }}">
+                        <tr data-metodo="{{ venta.metodo_pago }}" data-fecha="{{ venta.fecha_venta }}">
                             <td>
-                                <strong>#{{ venta.id }}</strong>
+                                <strong>#{{ venta.id_venta }}</strong>
                             </td>
                             <td>
-                                <div>{{ venta.fecha.strftime('%d/%m/%Y') }}</div>
-                                <small class="text-muted">{{ venta.fecha.strftime('%H:%M') }}</small>
+                                <div>{{ venta.fecha_venta }}</div>
+                                <small class="text-muted">{{ venta.hora_venta }}</small>
                             </td>
                             <td>
                                 <div>

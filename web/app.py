@@ -88,8 +88,14 @@ async def detalle_cliente(request: Request, cliente_id: int):
 @app.get("/ventas", response_class=HTMLResponse)
 async def lista_ventas(request: Request):
     """Página de gestión de ventas"""
+    # Obtenemos las ventas y las estadísticas necesarias
+    ventas = db.obtener_todas_ventas()
+    stats = db.obtener_estadisticas_ventas()
+    
     return templates.TemplateResponse("ventas.html", {
         "request": request,
+        "ventas": ventas,
+        "stats": stats,
         "page": "ventas"
     })
 

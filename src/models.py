@@ -120,6 +120,15 @@ class Venta:
     metodo_pago: str = "Efectivo"  # Efectivo, Tarjeta, Transferencia
     vendedor: str = ""
     notas_venta: str = ""
+    cliente: dict = field(default_factory=dict)  # Información del cliente para mostrar en la lista
+    
+    @property
+    def fecha(self):
+        """Devuelve la fecha como objeto datetime para facilitar el formateo en las plantillas"""
+        try:
+            return datetime.strptime(f"{self.fecha_venta} {self.hora_venta}", "%Y-%m-%d %H:%M")
+        except:
+            return datetime.now()
     
     def to_dict(self) -> dict:
         """Convierte la venta a diccionario"""
@@ -133,7 +142,8 @@ class Venta:
             'descuento_aplicado': self.descuento_aplicado,
             'metodo_pago': self.metodo_pago,
             'vendedor': self.vendedor,
-            'notas_venta': self.notas_venta
+            'notas_venta': self.notas_venta,
+            'cliente': self.cliente
         }
 
 # Constantes para categorías y estados

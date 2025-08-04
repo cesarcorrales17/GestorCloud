@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}{{ cliente.nombre_completo }} - GestorCloud{% endblock %}
+
+{% block page_title %}Detalle del Cliente{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Botones de acción -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <a href="/clientes" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Volver a Clientes
+            </a>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="/clientes/{{ cliente.id_cliente }}/editar" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar Cliente
+            </a>
+            <button class="btn btn-danger" onclick="eliminarCliente({{ cliente.id_cliente }})">
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
+        </div>
+    </div>
+
+    <!-- Información del cliente -->
+    <div class="row">
+        <!-- Panel principal de información -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user"></i> Información del Cliente
+                        {% if cliente.categoria == 'VIP' %}
+                        <span class="badge bg-warning text-dark ms-2">VIP</span>
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Nombre Completo:</strong> {{ cliente.nombre_completo }}</p>
+                            <p><strong>Edad:</strong> {{ cliente.edad }} años</p>
+                            <p><strong>Correo:</strong> {{ cliente.correo }}</p>
+                            <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Empresa:</strong> {{ cliente.empresa or 'No especificada' }}</p>
+                            <p><strong>Categoría:</strong> {{ cliente.categoria }}</p>
+                            <p><strong>Estado:</strong> {{ cliente.estado }}</p>
+                            <p><strong>Fecha Registro:</strong> {{ cliente.fecha_registro }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <p><strong>Dirección:</strong> {{ cliente.direccion }}</p>
+                            {% if cliente.notas %}
+                            <div class="alert alert-info">
+                                <strong>Notas:</strong> {{ cliente.notas }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial de ventas -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-shopping-cart"></i> Historial de Ventas
+                        <span class="badge bg-primary ms-2">{{ ventas|length }} ventas</span>
+                    </h4>
+                </div>
+                <div class="card-body p-0">
+                    {% if ventas %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Productos</th>
+                                    <th>Valor</th>
+                                    <th>Método de Pago</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for venta in ventas %}
+                                <tr>
+                                    <td>#{{ venta.id_venta }}</td>
+                                    <td>
+                                        {{ venta.fecha_venta }} <br>
+                                        <small class="text-muted">{{ venta.hora_venta }}</small>
+                                    </td>
+                                    <td>{{ venta.productos[:50] }}{% if venta.productos|length > 50 %}...{% endif %}</td>
+                                    <td class="text-success">${{ "{:,.0f}".format(venta.valor_total) }}</td>
+                                    <td>{{ venta.metodo_pago }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" onclick="verDetalleVenta({{ venta.id_venta }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No hay ventas registradas para este cliente</h5>
+                        <a href="/ventas/nueva" class="btn btn-primary mt-2">
+                            <i class="fas fa-plus"></i> Registrar Venta
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral de estadísticas -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-chart-line"></i> Estadísticas</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Valor total de compras -->
+                    <div class="stat-card primary mb-3">
+                        <div class="stat-number">${{ "{:,.0f}".format(cliente.valor_total_compras) }}</div>
+                        <div class="stat-label">Valor Total de Compras</div>
+                    </div>
+
+                    <!-- Cantidad de compras -->
+                    <div class="stat-card success mb-3">
+                        <div class="stat-number">{{ cliente.numero_compras }}</div>
+                        <div class="stat-label">Número de Compras</div>
+                    </div>
+
+                    <!-- Última compra -->
+                    <div class="stat-card warning">
+                        <div class="stat-number">{{ cliente.ultima_compra or "N/A" }}</div>
+                        <div class="stat-label">Última Compra</div>
+                    </div>
+
+                    {% if cliente.descuento_cliente > 0 %}
+                    <!-- Descuento -->
+                    <div class="alert alert-success mt-3">
+                        <i class="fas fa-tag"></i> Este cliente tiene un descuento del 
+                        <strong>{{ cliente.descuento_cliente * 100 }}%</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Acciones rápidas -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-bolt"></i> Acciones Rápidas</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/ventas/nueva?cliente={{ cliente.id_cliente }}" class="btn btn-primary">
+                            <i class="fas fa-cart-plus"></i> Nueva Venta
+                        </a>
+                        <button class="btn btn-outline-primary" onclick="enviarCorreo()">
+                            <i class="fas fa-envelope"></i> Enviar Correo
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="exportarDatos()">
+                            <i class="fas fa-file-export"></i> Exportar Datos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para confirmar eliminación -->
+<div class="modal fade" id="eliminarClienteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">¿Estás seguro que deseas eliminar a <strong>{{ cliente.nombre_completo }}</strong>?</p>
+                <p class="text-danger mt-2">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarEliminar">
+                    <i class="fas fa-trash"></i> Eliminar Cliente
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funciones específicas
+function eliminarCliente(clienteId) {
+    const modal = new bootstrap.Modal(document.getElementById('eliminarClienteModal'));
+    modal.show();
+    
+    document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
+        // Aquí iría el código para eliminar
+        // Por ahora solo simulamos
+        showToast('Cliente eliminado correctamente', 'success');
+        setTimeout(() => { window.location.href = '/clientes'; }, 1500);
+    });
+}
+
+function enviarCorreo() {
+    // Simulación
+    showToast('Enviando correo a {{ cliente.correo }}...', 'info');
+}
+
+function exportarDatos() {
+    // Simulación
+    showToast('Exportando datos del cliente...', 'info');
+}
+
+function verDetalleVenta(ventaId) {
+    // Simulación - aquí se abriría un modal con detalles
+    window.location.href = `/ventas/${ventaId}`;
+}
+
+// Función para mostrar toast (si no está definida en base.html)
+function showToast(message, type) {
+    const toast = document.getElementById("liveToast");
+    if (toast) {
+        const toastBody = toast.querySelector(".toast-body");
+        toastBody.textContent = message;
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+    } else {
+        alert(message);
+    }
+}
+</script>
+{% endblock %}
