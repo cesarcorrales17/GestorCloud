@@ -1,0 +1,727 @@
+{% extends "base.html" %} {% block title %}Clientes - GestorCloud{% endblock %}
+{% block page_title %}Gestión de Clientes{% endblock %} {% block content %}
+<div class="fade-in">
+  <!-- Header de la página -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div
+        class="card border-0"
+        style="
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+        "
+      >
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h2 class="mb-2">
+                <i class="fas fa-users me-2"></i>
+                Gestión de Clientes
+              </h2>
+              <p class="mb-0 opacity-90">
+                Administra todos tus clientes desde un solo lugar. Registra,
+                edita y consulta información.
+              </p>
+            </div>
+            <div class="col-md-4 text-end">
+              <a href="/clientes/nuevo" class="btn btn-light btn-lg">
+                <i class="fas fa-user-plus me-2"></i>
+                Nuevo Cliente
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros y búsqueda -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-search"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="searchInput"
+                  placeholder="Buscar por nombre, correo o empresa..."
+                />
+              </div>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" id="filterCategoria">
+                <option value="">Todas las categorías</option>
+                <option value="VIP">VIP</option>
+                <option value="Regular">Regular</option>
+                <option value="Prospecto">Prospecto</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" id="filterEstado">
+                <option value="">Todos los estados</option>
+                <option value="Activo">Activos</option>
+                <option value="Inactivo">Inactivos</option>
+                <option value="Prospecto">Prospectos</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas rápidas -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div
+        class="card text-center border-0"
+        style="
+          background: linear-gradient(135deg, #4f46e5, #3730a3);
+          color: white;
+        "
+      >
+        <div class="card-body">
+          <i class="fas fa-users fa-2x mb-2"></i>
+          <h3 class="mb-0">{{ clientes|length }}</h3>
+          <small>Total Clientes</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div
+        class="card text-center border-0"
+        style="
+          background: linear-gradient(135deg, #f59e0b, #d97706);
+          color: white;
+        "
+      >
+        <div class="card-body">
+          <i class="fas fa-crown fa-2x mb-2"></i>
+          <h3 class="mb-0">
+            {{ clientes|selectattr("categoria", "equalto", "VIP")|list|length }}
+          </h3>
+          <small>Clientes VIP</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div
+        class="card text-center border-0"
+        style="
+          background: linear-gradient(135deg, #10b981, #059669);
+          color: white;
+        "
+      >
+        <div class="card-body">
+          <i class="fas fa-user-check fa-2x mb-2"></i>
+          <h3 class="mb-0">
+            {{ clientes|selectattr("estado", "equalto", "Activo")|list|length }}
+          </h3>
+          <small>Activos</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div
+        class="card text-center border-0"
+        style="
+          background: linear-gradient(135deg, #06b6d4, #0891b2);
+          color: white;
+        "
+      >
+        <div class="card-body">
+          <i class="fas fa-user-clock fa-2x mb-2"></i>
+          <h3 class="mb-0">
+            {{ clientes|selectattr("categoria", "equalto",
+            "Prospecto")|list|length }}
+          </h3>
+          <small>Prospectos</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de clientes -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div
+          class="card-header d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-list me-2"></i>
+            Lista de Clientes
+          </h5>
+          <div class="d-flex gap-2">
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              onclick="toggleView('table')"
+            >
+              <i class="fas fa-table"></i> Tabla
+            </button>
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              onclick="toggleView('cards')"
+            >
+              <i class="fas fa-th-large"></i> Tarjetas
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          {% if clientes %}
+          <!-- Vista de tabla (por defecto) -->
+          <div id="tableView" class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Contacto</th>
+                  <th>Empresa</th>
+                  <th>Categoría</th>
+                  <th>Estado</th>
+                  <th>Total Compras</th>
+                  <th>Última Compra</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="clientesTableBody">
+                {% for cliente in clientes %}
+                <tr
+                  class="cliente-row"
+                  data-cliente="{{ cliente.nombre_completo|lower }} {{ cliente.correo|lower }} {{ cliente.empresa|lower }}"
+                  data-categoria="{{ cliente.categoria }}"
+                  data-estado="{{ cliente.estado }}"
+                >
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-circle me-3">
+                        <i class="fas fa-user"></i>
+                      </div>
+                      <div>
+                        <h6 class="mb-0">{{ cliente.nombre_completo }}</h6>
+                        <small class="text-muted"
+                          >ID: {{ cliente.id_cliente }}</small
+                        >
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div>
+                      <i class="fas fa-envelope text-muted me-1"></i>
+                      <small>{{ cliente.correo }}</small>
+                    </div>
+                    <div>
+                      <i class="fas fa-phone text-muted me-1"></i>
+                      <small>{{ cliente.telefono }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    {% if cliente.empresa %}
+                    <span class="badge bg-light text-dark"
+                      >{{ cliente.empresa }}</span
+                    >
+                    {% else %}
+                    <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span
+                      class="badge {% if cliente.categoria == 'VIP' %}bg-warning {% elif cliente.categoria == 'Regular' %}bg-primary {% elif cliente.categoria == 'Prospecto' %}bg-info {% else %}bg-secondary{% endif %}"
+                    >
+                      {% if cliente.categoria == 'VIP' %}
+                      <i class="fas fa-crown me-1"></i>
+                      {% endif %} {{ cliente.categoria }}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      class="badge {% if cliente.estado == 'Activo' %}bg-success {% elif cliente.estado == 'Prospecto' %}bg-info {% else %}bg-secondary{% endif %}"
+                    >
+                      {{ cliente.estado }}
+                    </span>
+                  </td>
+                  <td>
+                    <strong class="text-success"
+                      >${{ "{:,.0f}".format(cliente.valor_total_compras)
+                      }}</strong
+                    >
+                    <br />
+                    <small class="text-muted"
+                      >{{ cliente.numero_compras }} compras</small
+                    >
+                  </td>
+                  <td>
+                    {% if cliente.ultima_compra %} {{ cliente.ultima_compra }}
+                    <br />
+                    <small class="text-muted">
+                      {% set dias = cliente.dias_desde_ultima_compra() %} {% if
+                      dias >= 0 %} Hace {{ dias }} días {% endif %}
+                    </small>
+                    {% else %}
+                    <span class="text-muted">Sin compras</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="btn-group" role="group">
+                      <a
+                        href="/clientes/{{ cliente.id_cliente }}"
+                        class="btn btn-sm btn-outline-primary"
+                        title="Ver detalles"
+                      >
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a
+                        href="/clientes/{{ cliente.id_cliente }}/editar"
+                        class="btn btn-sm btn-outline-warning"
+                        title="Editar"
+                      >
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <a
+                        href="/ventas/nueva?cliente={{ cliente.id_cliente }}"
+                        class="btn btn-sm btn-outline-success"
+                        title="Nueva venta"
+                      >
+                        <i class="fas fa-shopping-cart"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Vista de tarjetas (oculta por defecto) -->
+          <div id="cardsView" class="row p-3" style="display: none">
+            {% for cliente in clientes %}
+            <div
+              class="col-lg-6 col-xl-4 mb-3 cliente-card"
+              data-cliente="{{ cliente.nombre_completo|lower }} {{ cliente.correo|lower }} {{ cliente.empresa|lower }}"
+              data-categoria="{{ cliente.categoria }}"
+              data-estado="{{ cliente.estado }}"
+            >
+              <div class="card h-100 cliente-card-item">
+                <div class="card-body">
+                  <div
+                    class="d-flex justify-content-between align-items-start mb-3"
+                  >
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-circle me-3">
+                        <i class="fas fa-user"></i>
+                      </div>
+                      <div>
+                        <h6 class="mb-0">{{ cliente.nombre_completo }}</h6>
+                        <small class="text-muted"
+                          >ID: {{ cliente.id_cliente }}</small
+                        >
+                      </div>
+                    </div>
+                    <span
+                      class="badge {% if cliente.categoria == 'VIP' %}bg-warning {% elif cliente.categoria == 'Regular' %}bg-primary {% elif cliente.categoria == 'Prospecto' %}bg-info {% else %}bg-secondary{% endif %}"
+                    >
+                      {{ cliente.categoria }}
+                    </span>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="d-flex align-items-center mb-1">
+                      <i class="fas fa-envelope text-muted me-2"></i>
+                      <small>{{ cliente.correo }}</small>
+                    </div>
+                    <div class="d-flex align-items-center mb-1">
+                      <i class="fas fa-phone text-muted me-2"></i>
+                      <small>{{ cliente.telefono }}</small>
+                    </div>
+                    {% if cliente.empresa %}
+                    <div class="d-flex align-items-center">
+                      <i class="fas fa-building text-muted me-2"></i>
+                      <small>{{ cliente.empresa }}</small>
+                    </div>
+                    {% endif %}
+                  </div>
+
+                  <div class="row text-center mb-3">
+                    <div class="col-6">
+                      <strong class="text-success d-block"
+                        >${{ "{:,.0f}".format(cliente.valor_total_compras)
+                        }}</strong
+                      >
+                      <small class="text-muted">Total compras</small>
+                    </div>
+                    <div class="col-6">
+                      <strong class="text-primary d-block"
+                        >{{ cliente.numero_compras }}</strong
+                      >
+                      <small class="text-muted">Compras</small>
+                    </div>
+                  </div>
+
+                  <div class="d-flex gap-2">
+                    <a
+                      href="/clientes/{{ cliente.id_cliente }}"
+                      class="btn btn-sm btn-outline-primary flex-fill"
+                    >
+                      <i class="fas fa-eye me-1"></i>Ver
+                    </a>
+                    <a
+                      href="/ventas/nueva?cliente={{ cliente.id_cliente }}"
+                      class="btn btn-sm btn-outline-success flex-fill"
+                    >
+                      <i class="fas fa-shopping-cart me-1"></i>Venta
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <!-- Estado vacío -->
+          <div class="text-center py-5">
+            <i class="fas fa-users fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted mb-3">No hay clientes registrados</h4>
+            <p class="text-muted mb-4">
+              Comienza registrando tu primer cliente para empezar a gestionar tu
+              negocio.
+            </p>
+            <a href="/clientes/nuevo" class="btn btn-primary btn-lg">
+              <i class="fas fa-user-plus me-2"></i>
+              Registrar Primer Cliente
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_css %}
+<style>
+  .cliente-card-item {
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+  }
+
+  .cliente-card-item:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+  }
+
+  .avatar-circle {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(
+      135deg,
+      var(--primary-color),
+      var(--primary-dark)
+    );
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.875rem;
+  }
+
+  .table tbody tr:hover {
+    background-color: rgba(79, 70, 229, 0.05);
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+  }
+
+  .btn-group .btn {
+    border-radius: 0.375rem;
+    margin: 0 1px;
+  }
+
+  @media (max-width: 768px) {
+    .table-responsive {
+      font-size: 0.875rem;
+    }
+
+    .btn-group .btn {
+      padding: 0.25rem 0.5rem;
+    }
+
+    .cliente-card {
+      margin-bottom: 1rem;
+    }
+  }
+</style>
+{% endblock %} {% block extra_js %}
+<script>
+  // Variables globales
+  let currentView = "table";
+
+  // Inicialización
+  document.addEventListener("DOMContentLoaded", function () {
+    initializeFilters();
+    initializeSearch();
+  });
+
+  // Búsqueda en tiempo real
+  function initializeSearch() {
+    const searchInput = document.getElementById("searchInput");
+    const filterCategoria = document.getElementById("filterCategoria");
+    const filterEstado = document.getElementById("filterEstado");
+
+    function applyFilters() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const categoriaFilter = filterCategoria.value;
+      const estadoFilter = filterEstado.value;
+
+      const rows = document.querySelectorAll(".cliente-row, .cliente-card");
+      let visibleCount = 0;
+
+      rows.forEach((row) => {
+        const clienteData = row.dataset.cliente;
+        const categoria = row.dataset.categoria;
+        const estado = row.dataset.estado;
+
+        const matchesSearch = !searchTerm || clienteData.includes(searchTerm);
+        const matchesCategoria =
+          !categoriaFilter || categoria === categoriaFilter;
+        const matchesEstado = !estadoFilter || estado === estadoFilter;
+
+        const shouldShow = matchesSearch && matchesCategoria && matchesEstado;
+
+        if (shouldShow) {
+          row.style.display = "";
+          visibleCount++;
+        } else {
+          row.style.display = "none";
+        }
+      });
+
+      // Mostrar mensaje si no hay resultados
+      updateNoResultsMessage(visibleCount);
+    }
+
+    searchInput.addEventListener("input", debounce(applyFilters, 300));
+    filterCategoria.addEventListener("change", applyFilters);
+    filterEstado.addEventListener("change", applyFilters);
+  }
+
+  // Inicializar filtros
+  function initializeFilters() {
+    // Obtener parámetros de URL si existen
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get("search");
+    const categoriaParam = urlParams.get("categoria");
+    const estadoParam = urlParams.get("estado");
+
+    if (searchParam) {
+      document.getElementById("searchInput").value = searchParam;
+    }
+    if (categoriaParam) {
+      document.getElementById("filterCategoria").value = categoriaParam;
+    }
+    if (estadoParam) {
+      document.getElementById("filterEstado").value = estadoParam;
+    }
+
+    // Aplicar filtros iniciales si existen
+    if (searchParam || categoriaParam || estadoParam) {
+      setTimeout(() => {
+        const event = new Event("input");
+        document.getElementById("searchInput").dispatchEvent(event);
+      }, 100);
+    }
+  }
+
+  // Cambiar vista entre tabla y tarjetas
+  function toggleView(view) {
+    const tableView = document.getElementById("tableView");
+    const cardsView = document.getElementById("cardsView");
+    const buttons = document.querySelectorAll('[onclick*="toggleView"]');
+
+    currentView = view;
+
+    if (view === "table") {
+      tableView.style.display = "block";
+      cardsView.style.display = "none";
+    } else {
+      tableView.style.display = "none";
+      cardsView.style.display = "block";
+    }
+
+    // Actualizar botones activos
+    buttons.forEach((btn) => {
+      btn.classList.remove("btn-primary");
+      btn.classList.add("btn-outline-secondary");
+    });
+
+    const activeButton = document.querySelector(
+      `[onclick="toggleView('${view}')"]`
+    );
+    if (activeButton) {
+      activeButton.classList.remove("btn-outline-secondary");
+      activeButton.classList.add("btn-primary");
+    }
+
+    // Guardar preferencia en localStorage
+    localStorage.setItem("clientesView", view);
+  }
+
+  // Cargar vista preferida
+  document.addEventListener("DOMContentLoaded", function () {
+    const savedView = localStorage.getItem("clientesView");
+    if (savedView && savedView !== "table") {
+      toggleView(savedView);
+    }
+  });
+
+  // Mostrar mensaje cuando no hay resultados
+  function updateNoResultsMessage(visibleCount) {
+    let noResultsMsg = document.getElementById("noResultsMessage");
+
+    if (visibleCount === 0) {
+      if (!noResultsMsg) {
+        noResultsMsg = document.createElement("div");
+        noResultsMsg.id = "noResultsMessage";
+        noResultsMsg.className = "text-center py-4";
+        noResultsMsg.innerHTML = `
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No se encontraron clientes</h5>
+                    <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
+                    <button class="btn btn-outline-primary" onclick="clearFilters()">
+                        <i class="fas fa-times me-2"></i>Limpiar filtros
+                    </button>
+                `;
+
+        const cardBody = document.querySelector(".card-body");
+        cardBody.appendChild(noResultsMsg);
+      }
+      noResultsMsg.style.display = "block";
+    } else {
+      if (noResultsMsg) {
+        noResultsMsg.style.display = "none";
+      }
+    }
+  }
+
+  // Limpiar todos los filtros
+  function clearFilters() {
+    document.getElementById("searchInput").value = "";
+    document.getElementById("filterCategoria").value = "";
+    document.getElementById("filterEstado").value = "";
+
+    // Mostrar todas las filas
+    document.querySelectorAll(".cliente-row, .cliente-card").forEach((row) => {
+      row.style.display = "";
+    });
+
+    // Ocultar mensaje de no resultados
+    const noResultsMsg = document.getElementById("noResultsMessage");
+    if (noResultsMsg) {
+      noResultsMsg.style.display = "none";
+    }
+
+    showToast("Filtros limpiados", "success");
+  }
+
+  // Utilidad debounce para optimizar búsqueda
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Exportar lista de clientes (placeholder)
+  function exportClientes() {
+    showToast("Función de exportación en desarrollo", "info");
+  }
+
+  // Importar clientes (placeholder)
+  function importClientes() {
+    showToast("Función de importación en desarrollo", "info");
+  }
+
+  // Acciones masivas (placeholder)
+  function accionesMasivas() {
+    showToast("Acciones masivas en desarrollo", "info");
+  }
+
+  // Animaciones para las tarjetas
+  document.addEventListener("DOMContentLoaded", function () {
+    const cards = document.querySelectorAll(".cliente-card-item");
+
+    cards.forEach((card, index) => {
+      card.style.animationDelay = `${index * 50}ms`;
+      card.classList.add("fade-in");
+    });
+  });
+
+  // Confirmar acciones de eliminación (cuando se implemente)
+  function confirmarEliminacion(clienteId, clienteNombre) {
+    if (
+      confirm(
+        `¿Estás seguro de que deseas eliminar al cliente "${clienteNombre}"?\n\nEsta acción no se puede deshacer.`
+      )
+    ) {
+      // Aquí iría la lógica de eliminación
+      showToast("Cliente eliminado correctamente", "success");
+    }
+  }
+
+  // Función para refrescar la lista
+  function refreshClientes() {
+    showToast("Actualizando lista de clientes...", "info");
+    setTimeout(() => {
+      location.reload();
+    }, 1000);
+  }
+
+  // Atajos de teclado
+  document.addEventListener("keydown", function (e) {
+    // Ctrl + F para enfocar búsqueda
+    if (e.ctrlKey && e.key === "f") {
+      e.preventDefault();
+      document.getElementById("searchInput").focus();
+    }
+
+    // Ctrl + N para nuevo cliente
+    if (e.ctrlKey && e.key === "n") {
+      e.preventDefault();
+      window.location.href = "/clientes/nuevo";
+    }
+
+    // Escape para limpiar búsqueda
+    if (e.key === "Escape") {
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput === document.activeElement) {
+        clearFilters();
+        searchInput.blur();
+      }
+    }
+  });
+
+  // Tooltips para botones de acción
+  document.addEventListener("DOMContentLoaded", function () {
+    // Inicializar tooltips de Bootstrap si están disponibles
+    const tooltipTriggerList = [].slice.call(
+      document.querySelectorAll("[title]")
+    );
+    if (typeof bootstrap !== "undefined" && bootstrap.Tooltip) {
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    }
+  });
+</script>
+{% endblock %}

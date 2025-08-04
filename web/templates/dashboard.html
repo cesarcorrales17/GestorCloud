@@ -1,0 +1,459 @@
+{% extends "base.html" %} {% block title %}Dashboard - GestorCloud{% endblock %}
+{% block page_title %}Dashboard{% endblock %} {% block content %}
+<div class="fade-in">
+  <!-- Welcome Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div
+        class="card border-0"
+        style="
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        "
+      >
+        <div class="card-body p-4">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h2 class="mb-2">¡Bienvenido a GestorCloud! 🌟</h2>
+              <p class="mb-0 opacity-90">
+                Gestiona tu negocio de manera inteligente. Aquí tienes un
+                resumen de tu actividad.
+              </p>
+            </div>
+            <div class="col-md-4 text-end">
+              <i class="fas fa-chart-line fa-3x opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas Principales -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="stat-number">{{ stats.total_clientes }}</div>
+            <div class="stat-label">Clientes Activos</div>
+          </div>
+          <div class="stat-icon">
+            <i class="fas fa-users fa-2x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="stat-card success">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="stat-number">
+              ${{ "{:,.0f}".format(stats.ingresos_mes) }}
+            </div>
+            <div class="stat-label">Ingresos del Mes</div>
+          </div>
+          <div class="stat-icon">
+            <i class="fas fa-dollar-sign fa-2x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="stat-card warning">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="stat-number">{{ stats.ventas_mes }}</div>
+            <div class="stat-label">Ventas del Mes</div>
+          </div>
+          <div class="stat-icon">
+            <i class="fas fa-shopping-cart fa-2x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="stat-card danger">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="stat-number">{{ stats.clientes_vip }}</div>
+            <div class="stat-label">Clientes VIP</div>
+          </div>
+          <div class="stat-icon">
+            <i class="fas fa-crown fa-2x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos y Tablas -->
+  <div class="row">
+    <!-- Distribución de Clientes -->
+    <div class="col-lg-6 mb-4">
+      <div class="card h-100">
+        <div
+          class="card-header d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-chart-pie text-primary me-2"></i>
+            Distribución de Clientes
+          </h5>
+          <span class="badge bg-primary">{{ stats.total_clientes }} Total</span>
+        </div>
+        <div class="card-body">
+          <canvas id="clientesChart" width="400" height="200"></canvas>
+
+          <!-- Leyenda -->
+          <div class="mt-3">
+            {% for categoria, cantidad in categorias.items() %}
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex align-items-center">
+                <div
+                  class="legend-color me-2"
+                  style="width: 12px; height: 12px; border-radius: 50%; background-color: 
+                                    {% if categoria == 'VIP' %}#f59e0b
+                                    {% elif categoria == 'Regular' %}#4f46e5
+                                    {% elif categoria == 'Prospecto' %}#06b6d4
+                                    {% else %}#6b7280{% endif %};"
+                ></div>
+                <span class="text-muted">{{ categoria }}</span>
+              </div>
+              <strong>{{ cantidad }}</strong>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Clientes -->
+    <div class="col-lg-6 mb-4">
+      <div class="card h-100">
+        <div
+          class="card-header d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-trophy text-warning me-2"></i>
+            Top Clientes
+          </h5>
+          <a href="/clientes" class="btn btn-sm btn-outline-primary"
+            >Ver todos</a
+          >
+        </div>
+        <div class="card-body">
+          {% if stats.top_clientes %}
+          <div class="list-group list-group-flush">
+            {% for nombre, valor in stats.top_clientes %}
+            <div class="list-group-item border-0 px-0 py-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <div class="avatar-circle me-3">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0">
+                      {{ nombre[:25] }}{% if nombre|length > 25 %}...{% endif %}
+                    </h6>
+                    <small class="text-muted">Cliente Premium</small>
+                  </div>
+                </div>
+                <div class="text-end">
+                  <strong class="text-success"
+                    >${{ "{:,.0f}".format(valor) }}</strong
+                  >
+                  <br />
+                  <small class="text-muted">Total compras</small>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-4">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No hay clientes registrados aún</p>
+            <a href="/clientes/nuevo" class="btn btn-primary"
+              >Registrar primer cliente</a
+            >
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Acciones Rápidas -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="fas fa-bolt text-warning me-2"></i>
+            Acciones Rápidas
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <a href="/clientes/nuevo" class="btn btn-primary w-100 py-3">
+                <i class="fas fa-user-plus fa-2x mb-2 d-block"></i>
+                <strong>Nuevo Cliente</strong>
+                <br />
+                <small>Registrar cliente</small>
+              </a>
+            </div>
+            <div class="col-md-3 mb-3">
+              <a href="/ventas/nueva" class="btn btn-success w-100 py-3">
+                <i class="fas fa-shopping-cart fa-2x mb-2 d-block"></i>
+                <strong>Nueva Venta</strong>
+                <br />
+                <small>Registrar venta</small>
+              </a>
+            </div>
+            <div class="col-md-3 mb-3">
+              <a href="/clientes" class="btn btn-info w-100 py-3">
+                <i class="fas fa-search fa-2x mb-2 d-block"></i>
+                <strong>Buscar Cliente</strong>
+                <br />
+                <small>Encontrar cliente</small>
+              </a>
+            </div>
+            <div class="col-md-3 mb-3">
+              <a href="/reportes" class="btn btn-warning w-100 py-3">
+                <i class="fas fa-chart-bar fa-2x mb-2 d-block"></i>
+                <strong>Ver Reportes</strong>
+                <br />
+                <small>Análisis y estadísticas</small>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actividad Reciente -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div
+          class="card-header d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-clock text-info me-2"></i>
+            Actividad Reciente
+          </h5>
+          <span class="badge bg-info">Últimas 24 horas</span>
+        </div>
+        <div class="card-body">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-marker bg-success"></div>
+              <div class="timeline-content">
+                <h6 class="mb-1">Nueva venta registrada</h6>
+                <p class="text-muted mb-1">
+                  Se registró una venta por $150,000
+                </p>
+                <small class="text-muted">Hace 2 horas</small>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker bg-primary"></div>
+              <div class="timeline-content">
+                <h6 class="mb-1">Cliente promocionado a VIP</h6>
+                <p class="text-muted mb-1">Juan Pérez alcanzó el nivel VIP</p>
+                <small class="text-muted">Hace 4 horas</small>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker bg-info"></div>
+              <div class="timeline-content">
+                <h6 class="mb-1">Nuevo cliente registrado</h6>
+                <p class="text-muted mb-1">
+                  María González se registró como cliente
+                </p>
+                <small class="text-muted">Hace 6 horas</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_css %}
+<style>
+  .avatar-circle {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(
+      135deg,
+      var(--primary-color),
+      var(--primary-dark)
+    );
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.875rem;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 30px;
+  }
+
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-color);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+
+  .timeline-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .timeline-marker {
+    position: absolute;
+    left: -23px;
+    top: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 1px var(--border-color);
+  }
+
+  .timeline-content {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .legend-color {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    .stat-number {
+      font-size: 2rem;
+    }
+
+    .timeline {
+      padding-left: 20px;
+    }
+
+    .timeline-marker {
+      left: -13px;
+    }
+  }
+</style>
+{% endblock %} {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+  // Gráfico de distribución de clientes
+  document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('clientesChart').getContext('2d');
+
+      const categorias = {{ categorias | tojson }};
+      const labels = Object.keys(categorias);
+      const data = Object.values(categorias);
+
+      const colors = {
+          'VIP': '#f59e0b',
+          'Regular': '#4f46e5',
+          'Prospecto': '#06b6d4',
+          'Inactivo': '#6b7280'
+      };
+
+      const backgroundColors = labels.map(label => colors[label] || '#6b7280');
+
+      new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+              labels: labels,
+              datasets: [{
+                  data: data,
+                  backgroundColor: backgroundColors,
+                  borderWidth: 0,
+                  hoverBorderWidth: 2,
+                  hoverBorderColor: '#ffffff'
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                  legend: {
+                      display: false
+                  },
+                  tooltip: {
+                      backgroundColor: 'rgba(0,0,0,0.8)',
+                      titleColor: '#ffffff',
+                      bodyColor: '#ffffff',
+                      borderColor: 'rgba(255,255,255,0.1)',
+                      borderWidth: 1,
+                      cornerRadius: 8,
+                      callbacks: {
+                          label: function(context) {
+                              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                              const percentage = ((context.parsed / total) * 100).toFixed(1);
+                              return `${context.label}: ${context.parsed} (${percentage}%)`;
+                          }
+                      }
+                  }
+              },
+              cutout: '60%',
+              animation: {
+                  animateRotate: true,
+                  duration: 1000
+              }
+          }
+      });
+
+      // Actualizar estadísticas cada 30 segundos
+      setInterval(function() {
+          fetch('/api/estadisticas')
+              .then(response => response.json())
+              .then(data => {
+                  // Actualizar números en las tarjetas de estadísticas
+                  updateStats(data.stats);
+              })
+              .catch(error => console.log('Error actualizando estadísticas:', error));
+      }, 30000);
+  });
+
+  function updateStats(stats) {
+      // Esta función actualizaría las estadísticas en tiempo real
+      // Por ahora solo la estructura, se puede implementar después
+      console.log('Estadísticas actualizadas:', stats);
+  }
+
+  // Efectos de hover en las tarjetas de acciones rápidas
+  document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateY(-2px) scale(1.02)';
+      });
+
+      btn.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateY(0) scale(1)';
+      });
+  });
+</script>
+{% endblock %}
