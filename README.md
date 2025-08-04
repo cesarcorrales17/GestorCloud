@@ -277,7 +277,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 **César Corrales**
 - GitHub: [@cesarcorrales17](https://github.com/cesarcorrales17)
-- Email: cesarcorrales17@ejemplo.com
+- Email: cesarcorrales00@gmal.com.com
 - LinkedIn: [César Corrales](https://linkedin.com/in/cesarcorrales17)
 
 ## 🙏 Agradecimientos
@@ -292,7 +292,7 @@ Si tienes preguntas, problemas o sugerencias:
 
 1. 🐛 **Reportar bugs**: [Issues en GitHub](https://github.com/cesarcorrales17/GestorCloud/issues)
 2. 💬 **Preguntas**: [Discussions](https://github.com/cesarcorrales17/GestorCloud/discussions)
-3. 📧 **Email**: cesarcorrales17@ejemplo.com
+3. 📧 **Email**: cesarcorrales00@gmail.com
 
 ---
 
