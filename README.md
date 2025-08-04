@@ -23,7 +23,6 @@
 ## 🚀 Instalación Rápida
 
 ### Prerrequisitos
-
 - Python 3.8 o superior
 - Git
 
@@ -52,33 +51,58 @@ python main.py
 
 ## 🎯 Uso
 
-### Interfaz de Línea de Comandos
+### 🖥️ Interfaz Web (Recomendada)
 
-GestorCloud incluye una interfaz CLI completa con menús intuitivos:
+GestorCloud incluye una moderna interfaz web con dashboard interactivo:
 
 ```bash
+# Ejecutar la aplicación web
+python run_web.py
+
+# O manualmente
+cd web
+python app.py
+```
+
+Luego abre tu navegador en: **http://localhost:8000**
+
+#### Características de la interfaz web:
+- 📊 **Dashboard interactivo** con estadísticas en tiempo real
+- 👥 **Gestión visual de clientes** con búsqueda y filtros
+- 💰 **Registro de ventas** con interfaz intuitiva
+- 📱 **Diseño responsive** para móvil y tablet
+- 🎨 **Interfaz moderna** con animaciones suaves
+- 🔍 **Búsqueda en tiempo real** y filtros avanzados
+
+### 💻 Interfaz de Línea de Comandos
+
+También disponible la versión CLI completa:
+
+```bash
+# Desde la raíz del proyecto
+python -m src.main
+
+# O directamente
+cd src
 python main.py
 ```
 
 ### Funcionalidades Disponibles
 
 #### 👥 Gestión de Clientes
-
 - ➕ Registrar nuevos clientes
 - 📋 Ver todos los clientes
-- 🔍 Buscar por nombre, correo o empresa
+- 🔍 Buscar por nombre, correo o empresa  
 - 📊 Ver detalles completos con historial
 - 🏷️ Categorización automática (Regular/VIP)
 
 #### 💰 Gestión de Ventas
-
 - 💳 Registrar nuevas ventas
 - 🌟 Descuentos automáticos para clientes VIP
 - 📅 Historial de transacciones
 - 💳 Múltiples métodos de pago
 
 #### 📊 Reportes
-
 - 📈 Estadísticas generales del negocio
 - 🏆 Top clientes por valor
 - 📊 Distribución por categorías
@@ -88,17 +112,29 @@ python main.py
 
 ```
 GestorCloud/
-├── main.py              # Aplicación principal CLI
-├── models.py            # Modelos de datos (Cliente, Venta)
-├── database.py          # Gestión de base de datos SQLite
-├── requirements.txt     # Dependencias del proyecto
-├── README.md           # Documentación
-├── data/               # Base de datos local
+├── README.md              # Documentación del proyecto
+├── requirements.txt       # Dependencias Python
+├── run_web.py            # 🌐 Ejecutar aplicación web
+├── src/                  # 💻 Código fuente CLI
+│   ├── __init__.py
+│   ├── main.py          # Aplicación principal CLI
+│   ├── models.py        # Modelos de datos
+│   └── database.py      # Gestión de SQLite
+├── web/                 # 🌐 Aplicación web
+│   ├── app.py          # FastAPI backend
+│   ├── templates/      # Templates HTML
+│   │   ├── base.html   # Layout base
+│   │   ├── dashboard.html
+│   │   ├── clientes.html
+│   │   └── cliente_form.html
+│   └── static/         # Archivos estáticos
+│       ├── css/        # Estilos personalizados
+│       ├── js/         # JavaScript
+│       └── img/        # Imágenes
+├── data/               # 💾 Base de datos local
 │   └── gestorcloud.db  # SQLite database
-└── web/                # Versión web (próximamente)
-    ├── app.py          # FastAPI application
-    ├── templates/      # HTML templates
-    └── static/         # CSS, JS, imágenes
+└── tests/              # 🧪 Pruebas unitarias
+    └── test_models.py
 ```
 
 ## 💡 Ejemplos de Uso
@@ -182,21 +218,18 @@ GestorCloud incluye un sistema de reportes que muestra:
 ## 🚧 Roadmap
 
 ### Versión 1.1 (Próximamente)
-
 - [ ] 🌐 Interfaz web con FastAPI
 - [ ] 📱 Diseño responsive
 - [ ] 📧 Envío de emails automáticos
 - [ ] 📊 Gráficos interactivos
 
 ### Versión 1.2 (Futuro)
-
 - [ ] 📅 Sistema de citas y recordatorios
 - [ ] 💳 Integración con pasarelas de pago
 - [ ] 📱 API REST completa
 - [ ] 🔐 Sistema de usuarios y roles
 
 ### Versión 2.0 (Visión)
-
 - [ ] ☁️ Versión SaaS multi-empresa
 - [ ] 🤖 Integración con WhatsApp Business
 - [ ] 📈 Machine Learning para predicciones
@@ -226,7 +259,6 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 ## 👨‍💻 Autor
 
 **César Corrales**
-
 - GitHub: [@cesarcorrales17](https://github.com/cesarcorrales17)
 - Email: cesarcorrales17@ejemplo.com
 - LinkedIn: [César Corrales](https://linkedin.com/in/cesarcorrales17)
