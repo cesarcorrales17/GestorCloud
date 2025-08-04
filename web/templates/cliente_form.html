@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if cliente %}Editar Cliente{% else %}Nuevo Cliente{% endif %} - GestorCloud
+{% endblock %}
+
+{% block page_title %}
+{% if cliente %}Editar Cliente{% else %}Registrar Nuevo Cliente{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        {% if cliente %}
+                            <i class="fas fa-user-edit"></i> Editar Cliente
+                        {% else %}
+                            <i class="fas fa-user-plus"></i> Nuevo Cliente
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% if cliente %}/clientes/{{ cliente.id }}/editar{% else %}/clientes/nuevo{% endif %}">
+                        <div class="row">
+                            <!-- Información Personal -->
+                            <div class="col-md-6">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user"></i> Información Personal
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="nombre_completo" class="form-label">Nombre Completo *</label>
+                                    <input type="text" class="form-control" id="nombre_completo" name="nombre_completo" 
+                                           value="{% if cliente %}{{ cliente.nombre_completo }}{% endif %}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="edad" class="form-label">Edad *</label>
+                                    <input type="number" class="form-control" id="edad" name="edad" 
+                                           value="{% if cliente %}{{ cliente.edad }}{% endif %}" min="1" max="120" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="direccion" class="form-label">Dirección *</label>
+                                    <textarea class="form-control" id="direccion" name="direccion" rows="3" required>{% if cliente %}{{ cliente.direccion }}{% endif %}</textarea>
+                                </div>
+                            </div>
+
+                            <!-- Información de Contacto -->
+                            <div class="col-md-6">
+                                <h5 class="text-success mb-3">
+                                    <i class="fas fa-address-book"></i> Información de Contacto
+                                </h5>
+
+                                <div class="mb-3">
+                                    <label for="correo" class="form-label">Correo Electrónico *</label>
+                                    <input type="email" class="form-control" id="correo" name="correo" 
+                                           value="{% if cliente %}{{ cliente.correo }}{% endif %}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="telefono" class="form-label">Teléfono *</label>
+                                    <input type="tel" class="form-control" id="telefono" name="telefono" 
+                                           value="{% if cliente %}{{ cliente.telefono }}{% endif %}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="empresa" class="form-label">Empresa</label>
+                                    <input type="text" class="form-control" id="empresa" name="empresa" 
+                                           value="{% if cliente %}{{ cliente.empresa }}{% endif %}">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="categoria" class="form-label">Categoría</label>
+                                    <select class="form-select" id="categoria" name="categoria">
+                                        <option value="Regular" {% if cliente and cliente.categoria == 'Regular' %}selected{% endif %}>Regular</option>
+                                        <option value="VIP" {% if cliente and cliente.categoria == 'VIP' %}selected{% endif %}>VIP</option>
+                                        <option value="Prospecto" {% if cliente and cliente.categoria == 'Prospecto' %}selected{% endif %}>Prospecto</option>
+                                    </select>
+                                </div>
+
+                                {% if cliente %}
+                                <div class="mb-3">
+                                    <label for="estado" class="form-label">Estado</label>
+                                    <select class="form-select" id="estado" name="estado">
+                                        <option value="Activo" {% if cliente.estado == 'Activo' %}selected{% endif %}>Activo</option>
+                                        <option value="Inactivo" {% if cliente.estado == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+                                        <option value="Suspendido" {% if cliente.estado == 'Suspendido' %}selected{% endif %}>Suspendido</option>
+                                    </select>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Botones de acción -->
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-save"></i> 
+                                    {% if cliente %}Actualizar Cliente{% else %}Registrar Cliente{% endif %}
+                                </button>
+                                <a href="/clientes" class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if cliente %}
+            <!-- Historial de compras -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-cart"></i> Historial de Compras
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if cliente.ventas %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Productos</th>
+                                        <th>Valor</th>
+                                        <th>Método de Pago</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for venta in cliente.ventas %}
+                                    <tr>
+                                        <td>{{ venta.fecha.strftime('%d/%m/%Y') }}</td>
+                                        <td>{{ venta.productos }}</td>
+                                        <td>${{ "{:,.0f}".format(venta.valor_total) }}</td>
+                                        <td>{{ venta.metodo_pago }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3">
+                            <strong>Total Compras: </strong>
+                            <span class="text-success">${{ "{:,.0f}".format(cliente.valor_total_compras) }}</span>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-info-circle"></i> 
+                            Este cliente aún no tiene compras registradas.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Validación de formulario
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    
+    form.addEventListener('submit', function(e) {
+        const nombre = document.getElementById('nombre_completo').value.trim();
+        const edad = document.getElementById('edad').value;
+        const correo = document.getElementById('correo').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+        
+        if (!nombre || !edad || !correo || !telefono) {
+            e.preventDefault();
+            alert('Por favor completa todos los campos obligatorios');
+            return false;
+        }
+        
+        if (edad < 1 || edad > 120) {
+            e.preventDefault();
+            alert('La edad debe estar entre 1 y 120 años');
+            return false;
+        }
+        
+        // Validación básica de email
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(correo)) {
+            e.preventDefault();
+            alert('Por favor ingresa un correo electrónico válido');
+            return false;
+        }
+        
+        // Validación básica de teléfono (números y algunos caracteres especiales)
+        const telefonoPattern = /^[\d\s\-\+\(\)]+$/;
+        if (!telefonoPattern.test(telefono)) {
+            e.preventDefault();
+            alert('Por favor ingresa un número de teléfono válido');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}
