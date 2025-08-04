@@ -278,7 +278,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 **César Corrales**
 - GitHub: [@cesarcorrales17](https://github.com/cesarcorrales17)
 - Email: cesarcorrales00@gmal.com.com
-- LinkedIn: [César Corrales](https://linkedin.com/in/cesarcorrales17)
+- LinkedIn: [César Corrales](https://www.linkedin.com/in/cesar-david-c-61597913a/)
 
 ## 🙏 Agradecimientos
 
