@@ -8,6 +8,14 @@ import uvicorn
 import sys
 import os
 
+# Cargar variables de entorno
+try:
+    import dotenv
+    dotenv.load_dotenv()
+except ImportError:
+    print("⚠️ dotenv no está instalado. Las variables de entorno no se cargarán.")
+    print("   Instale dotenv con: pip install python-dotenv")
+
 # Agregar el directorio web al path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'web'))
 

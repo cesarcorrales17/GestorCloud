@@ -17,7 +17,7 @@
 - 📊 **Reportes y Estadísticas**: Dashboard con métricas importantes del negocio
 - ⚙️ **Configuración del Sistema**: Personalización de negocio y preferencias
 - 🌟 **Sistema VIP**: Descuentos automáticos para clientes premium
-- 💾 **Persistencia de Datos**: Base de datos SQLite local
+- 💾 **Persistencia de Datos**: Soporte para SQLite (local) y PostgreSQL (producción)
 - 🔒 **Validaciones Robustas**: Email, teléfono y datos empresariales
 - 📈 **Escalable**: Arquitectura preparada para crecimiento
 
@@ -43,12 +43,17 @@ venv\Scripts\activate
 # En macOS/Linux:
 source venv/bin/activate
 
-# 4. Instalar dependencias
+# 4. Configurar el entorno automáticamente (recomendado)
+./setup_environment.sh
+
+# O instalar dependencias manualmente
 pip install -r requirements.txt
 
 # 5. Ejecutar GestorCloud
 python main.py
 ```
+
+Para detalles sobre la configuración de PostgreSQL, consulte [README_POSTGRES.md](README_POSTGRES.md)
 
 ## 🎯 Uso
 
@@ -116,15 +121,22 @@ python main.py
 ```
 GestorCloud/
 ├── README.md              # Documentación del proyecto
+├── README_POSTGRES.md     # 📚 Documentación de integración con PostgreSQL
 ├── requirements.txt       # Dependencias Python
 ├── run_web.py            # 🌐 Ejecutar aplicación web
+├── setup_environment.sh  # 🛠️ Script de configuración automática
+├── test_db_connection.py # 🔍 Herramienta de verificación de conexión BD
+├── migrate_to_postgres.py # 🔄 Migración de SQLite a PostgreSQL
+├── .env.example          # 📝 Ejemplo de configuración
+├── .env                  # 📝 Configuración del entorno (creado por usuario)
 ├── src/                  # 💻 Código fuente CLI
 │   ├── __init__.py
 │   ├── main.py          # Aplicación principal CLI
 │   ├── models.py        # Modelos de datos
-│   └── database.py      # Gestión de SQLite
+│   ├── database.py      # Gestión de SQLite (original)
+│   └── database_new.py  # 🆕 Módulo de base de datos dual SQLite/PostgreSQL
 ├── web/                 # 🌐 Aplicación web
-│   ├── app.py          # FastAPI backend
+│   ├── app.py          # FastAPI backend (actualizado)
 │   ├── templates/      # Templates HTML
 │   │   ├── base.html   # Layout base
 │   │   ├── dashboard.html
@@ -195,18 +207,48 @@ venta_id = db.agregar_venta(venta)
 
 ### Variables de Entorno
 
-Puedes personalizar la configuración creando un archivo `.env`:
+Puedes personalizar la configuración creando un archivo `.env` (o usar el script `setup_environment.sh`):
 
 ```env
-DB_PATH=data/mi_empresa.db
+# Database Configuration
+# Database Type (sqlite or postgres)
+DB_TYPE=sqlite
+
+# SQLite Configuration
+SQLITE_PATH=data/gestorcloud.db
 BACKUP_PATH=backups/
+
+# PostgreSQL Configuration
+PG_HOST=localhost
+PG_PORT=5432
+PG_USER=postgres
+PG_PASSWORD=postgres
+PG_DATABASE=gestorcloud
+
+# Business Configuration
 DEFAULT_DISCOUNT_VIP=0.05
 MIN_VIP_AMOUNT=1000000
 ```
 
 ### Configuración de Base de Datos
 
-Por defecto, GestorCloud usa SQLite con la base de datos en `data/gestorcloud.db`. La base de datos se crea automáticamente en la primera ejecución.
+GestorCloud ahora soporta dos opciones de bases de datos:
+
+#### SQLite (predeterminado)
+- Configuración mínima, ideal para desarrollo y despliegues pequeños
+- La base de datos se crea automáticamente en `data/gestorcloud.db`
+- No requiere instalación adicional
+
+#### PostgreSQL (recomendado para producción)
+- Mayor rendimiento con grandes volúmenes de datos
+- Mejor soporte para concurrencia (múltiples usuarios simultáneos)
+- Requiere instalación y configuración de PostgreSQL
+- Ver [README_POSTGRES.md](README_POSTGRES.md) para instrucciones detalladas
+
+#### Herramientas de gestión de base de datos
+- `test_db_connection.py`: Verifica la conexión a ambos tipos de base de datos
+- `migrate_to_postgres.py`: Migra todos los datos desde SQLite a PostgreSQL
+- `setup_environment.sh`: Configura automáticamente el entorno (incluida la base de datos)
 
 ## 📊 Dashboard y Reportes
 
@@ -232,6 +274,7 @@ GestorCloud incluye un sistema de reportes que muestra:
 - [x] 📱 Diseño responsive
 - [x] ⚙️ Panel de configuración del sistema
 - [x] 📊 Sistema de reportes y análisis
+- [x] 🗄️ Soporte para PostgreSQL en producción
 - [ ] 🌓 Modo claro/oscuro
 
 ### Versión 1.2 (Próximamente)

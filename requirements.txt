@@ -13,6 +13,10 @@ python-multipart==0.0.6
 
 # Database
 sqlite3  # Incluido en Python estándar
+psycopg2-binary==2.9.9  # PostgreSQL driver
+sqlalchemy==2.0.25  # SQL ORM
+python-dotenv==1.0.0  # For environment variables
+alembic==1.12.1  # Database migrations
 
 # Utilities
 colorama==0.4.6  # Para colores en terminal
@@ -31,4 +35,7 @@ flake8==6.1.0
 
 # Optional - Para versión web avanzada
 bootstrap-flask==2.3.2
-plotly==5.17.0   # Para gráficos interactivos
+plotly==5.17.0   # Para gráficos interactivospsycopg2-binary>=2.9.10
+sqlalchemy>=2.0.41
+python-dotenv>=1.0.0
+alembic>=1.16.4
