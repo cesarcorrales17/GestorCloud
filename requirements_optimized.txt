@@ -1,0 +1,21 @@
+# GestorCloud - Dependencias optimizadas
+# CRM para pequeñas empresas
+
+# Core dependencies
+python-dateutil>=2.8.2
+
+# Web framework
+fastapi>=0.104.1
+uvicorn>=0.24.0
+jinja2>=3.1.2
+python-multipart>=0.0.6
+
+# Database - PostgreSQL only
+psycopg2-binary>=2.9.10
+python-dotenv>=1.0.0
+
+# Utilities
+# La mayoría de utilidades CLI fueron removidas para optimizar
+
+# Optional - Para exportación
+openpyxl>=3.1.2  # Solo para exportar a Excel

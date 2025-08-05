@@ -11,7 +11,7 @@ import re
 @dataclass
 class Cliente:
     """Modelo de cliente empresarial mejorado"""
-    # Datos básicos (de tu código original)
+    # Datos básicos
     nombre_completo: str
     edad: int
     direccion: str

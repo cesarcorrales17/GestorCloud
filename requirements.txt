@@ -1,41 +1,6 @@
-# GestorCloud - Dependencias del proyecto
-# CRM para pequeñas empresas
-
-# Core dependencies
-dataclasses-json==0.6.1
-python-dateutil==2.8.2
-
-# Web framework (para versión web futura)
-fastapi==0.104.1
-uvicorn==0.24.0
+fastapi==0.103.1
+uvicorn==0.23.2
 jinja2==3.1.2
 python-multipart==0.0.6
-
-# Database
-sqlite3  # Incluido en Python estándar
-psycopg2-binary==2.9.9  # PostgreSQL driver
-sqlalchemy==2.0.25  # SQL ORM
-python-dotenv==1.0.0  # For environment variables
-alembic==1.12.1  # Database migrations
-
-# Utilities
-colorama==0.4.6  # Para colores en terminal
-rich==13.7.0     # Para interfaces bonitas en CLI
-click==8.1.7     # Para CLI avanzada
-
-# Data processing
-pandas==2.1.3    # Para reportes y análisis
-openpyxl==3.1.2  # Para exportar a Excel
-
-# Development dependencies
-pytest==7.4.3
-pytest-cov==4.1.0
-black==23.11.0
-flake8==6.1.0
-
-# Optional - Para versión web avanzada
-bootstrap-flask==2.3.2
-plotly==5.17.0   # Para gráficos interactivospsycopg2-binary>=2.9.10
-sqlalchemy>=2.0.41
-python-dotenv>=1.0.0
-alembic>=1.16.4
+psycopg2-binary==2.9.7
+python-dotenv==1.0.0

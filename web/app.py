@@ -17,7 +17,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from models import Cliente, Venta, CATEGORIAS_CLIENTE, ESTADOS_CLIENTE, METODOS_PAGO
-from database import GestorCloudDB
+from database_postgres import GestorCloudDB
 
 # Inicializar FastAPI
 app = FastAPI(
