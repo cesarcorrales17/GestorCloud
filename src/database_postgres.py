@@ -30,14 +30,25 @@ class GestorCloudDB:
         
     def _get_connection(self):
         """Obtiene una conexión a la base de datos"""
-        return psycopg2.connect(
-            dbname=self.db_name,
-            user=self.db_user,
-            password=self.db_password,
-            host=self.db_host,
-            port=self.db_port,
-            client_encoding='utf8'
-        )
+        try:
+            return psycopg2.connect(
+                dbname=self.db_name,
+                user=self.db_user,
+                password=self.db_password,
+                host=self.db_host,
+                port=self.db_port,
+                client_encoding='UTF8'
+            )
+        except UnicodeDecodeError:
+            # Intentar con encoding diferente si hay problemas con caracteres especiales
+            return psycopg2.connect(
+                dbname=self.db_name,
+                user=self.db_user,
+                password=self.db_password,
+                host=self.db_host,
+                port=self.db_port,
+                client_encoding='LATIN1'
+            )
     
     def _crear_tablas(self):
         """Crea las tablas necesarias en la base de datos"""
