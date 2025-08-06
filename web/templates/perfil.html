@@ -1,0 +1,735 @@
+{% extends "base.html" %}
+{% block title %}Perfil de Usuario - GestorCloud{% endblock %}
+{% block page_title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+  <!-- Header del Perfil -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: white;">
+        <div class="card-body p-4">
+          <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+              <div class="profile-avatar">
+                <img id="profileImage" src="https://via.placeholder.com/120/4f46e5/ffffff?text=JP" alt="Perfil" class="rounded-circle">
+                <div class="avatar-overlay" onclick="changeProfilePicture()">
+                  <i class="fas fa-camera"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-10">
+              <h2 class="mb-2">{{ usuario.nombre or 'Juan Pérez' }}</h2>
+              <p class="mb-1 opacity-90">
+                <i class="fas fa-envelope me-2"></i>{{ usuario.email or 'juan.perez@empresa.com' }}
+              </p>
+              <p class="mb-1 opacity-90">
+                <i class="fas fa-building me-2"></i>{{ usuario.empresa or 'Mi Empresa S.A.S' }}
+              </p>
+              <p class="mb-0 opacity-90">
+                <i class="fas fa-calendar me-2"></i>Miembro desde {{ usuario.fecha_registro or 'enero 2024' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs de Perfil -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" id="profileTabs">
+            <li class="nav-item">
+              <a class="nav-link active" href="#informacion-personal" data-bs-toggle="tab">
+                <i class="fas fa-user me-2"></i>Información Personal
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#seguridad" data-bs-toggle="tab">
+                <i class="fas fa-shield-alt me-2"></i>Seguridad
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#empresa" data-bs-toggle="tab">
+                <i class="fas fa-building me-2"></i>Información de Empresa
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#preferencias" data-bs-toggle="tab">
+                <i class="fas fa-cog me-2"></i>Preferencias
+              </a>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="card-body">
+          <div class="tab-content">
+            
+            <!-- Tab: Información Personal -->
+            <div class="tab-pane fade show active" id="informacion-personal">
+              <form id="personalInfoForm" method="POST" action="/perfil/actualizar">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="nombre" class="form-label">Nombre Completo</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ usuario.nombre or 'Juan Pérez' }}" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Correo Electrónico</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email or 'juan.perez@empresa.com' }}" required>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="telefono" class="form-label">Teléfono</label>
+                    <input type="tel" class="form-control" id="telefono" name="telefono" value="{{ usuario.telefono or '+57 300 123 4567' }}">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento</label>
+                    <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" value="{{ usuario.fecha_nacimiento or '' }}">
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="direccion" class="form-label">Dirección</label>
+                  <textarea class="form-control" id="direccion" name="direccion" rows="2" placeholder="Calle 123 #45-67, Bogotá, Colombia">{{ usuario.direccion or '' }}</textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save me-2"></i>Guardar Cambios
+                </button>
+              </form>
+            </div>
+            
+            <!-- Tab: Seguridad -->
+            <div class="tab-pane fade" id="seguridad">
+              <div class="row">
+                <div class="col-lg-6">
+                  <h5 class="mb-3">Cambiar Contraseña</h5>
+                  <form id="passwordForm" method="POST" action="/perfil/cambiar-password">
+                    <div class="mb-3">
+                      <label for="currentPassword" class="form-label">Contraseña Actual</label>
+                      <div class="position-relative">
+                        <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                        <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-2" onclick="togglePassword('currentPassword')">
+                          <i id="currentPasswordIcon" class="fas fa-eye text-muted"></i>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="newPassword" class="form-label">Nueva Contraseña</label>
+                      <div class="position-relative">
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                        <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-2" onclick="togglePassword('newPassword')">
+                          <i id="newPasswordIcon" class="fas fa-eye text-muted"></i>
+                        </button>
+                      </div>
+                      <div id="newPasswordStrength" class="password-strength" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="confirmNewPassword" class="form-label">Confirmar Nueva Contraseña</label>
+                      <div class="position-relative">
+                        <input type="password" class="form-control" id="confirmNewPassword" name="confirmNewPassword" required>
+                        <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-2" onclick="togglePassword('confirmNewPassword')">
+                          <i id="confirmNewPasswordIcon" class="fas fa-eye text-muted"></i>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning">
+                      <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                    </button>
+                  </form>
+                </div>
+                
+                <div class="col-lg-6">
+                  <h5 class="mb-3">Autenticación de Dos Factores</h5>
+                  <div class="card bg-light">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                          <h6 class="mb-1">2FA Activado</h6>
+                          <small class="text-muted">Protege tu cuenta con un segundo factor</small>
+                        </div>
+                        <div class="form-check form-switch">
+                          <input class="form-check-input" type="checkbox" id="enable2FA" {{ 'checked' if usuario.two_factor_enabled else '' }}>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="mt-3">
+                    <h6>Sesiones Activas</h6>
+                    <div class="list-group">
+                      <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <strong>Navegador Actual</strong>
+                          <br><small class="text-muted">Chrome en Windows • IP: 192.168.1.100</small>
+                        </div>
+                        <span class="badge bg-success">Activa</span>
+                      </div>
+                      <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <strong>Móvil</strong>
+                          <br><small class="text-muted">Safari en iPhone • IP: 192.168.1.105</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="cerrarSesion('mobile')">Cerrar</button>
+                      </div>
+                    </div>
+                    
+                    <button class="btn btn-outline-danger mt-2" onclick="cerrarTodasSesiones()">
+                      <i class="fas fa-sign-out-alt me-2"></i>Cerrar Todas las Sesiones
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Tab: Información de Empresa -->
+            <div class="tab-pane fade" id="empresa">
+              <form id="empresaForm" method="POST" action="/perfil/empresa">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="nombreEmpresa" class="form-label">Nombre de la Empresa</label>
+                    <input type="text" class="form-control" id="nombreEmpresa" name="nombreEmpresa" value="{{ empresa.nombre or 'Mi Empresa S.A.S' }}">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="nit" class="form-label">NIT</label>
+                    <input type="text" class="form-control" id="nit" name="nit" value="{{ empresa.nit or '900123456-7' }}">
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="tipoEmpresa" class="form-label">Tipo de Empresa</label>
+                    <select class="form-select" id="tipoEmpresa" name="tipoEmpresa">
+                      <option value="">Selecciona una opción</option>
+                      <option value="retail" {{ 'selected' if empresa.tipo == 'retail' else '' }}>Retail / Tienda</option>
+                      <option value="servicios" {{ 'selected' if empresa.tipo == 'servicios' else '' }}>Servicios</option>
+                      <option value="restaurante" {{ 'selected' if empresa.tipo == 'restaurante' else '' }}>Restaurante</option>
+                      <option value="tecnologia" {{ 'selected' if empresa.tipo == 'tecnologia' else '' }}>Tecnología</option>
+                      <option value="salud" {{ 'selected' if empresa.tipo == 'salud' else '' }}>Salud</option>
+                      <option value="educacion" {{ 'selected' if empresa.tipo == 'educacion' else '' }}>Educación</option>
+                      <option value="otro" {{ 'selected' if empresa.tipo == 'otro' else '' }}>Otro</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="sitioWeb" class="form-label">Sitio Web</label>
+                    <input type="url" class="form-control" id="sitioWeb" name="sitioWeb" value="{{ empresa.sitio_web or '' }}" placeholder="https://miempresa.com">
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="direccionEmpresa" class="form-label">Dirección de la Empresa</label>
+                  <textarea class="form-control" id="direccionEmpresa" name="direccionEmpresa" rows="2">{{ empresa.direccion or '' }}</textarea>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="descripcion" class="form-label">Descripción del Negocio</label>
+                  <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Describe brevemente tu negocio...">{{ empresa.descripcion or '' }}</textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-building me-2"></i>Actualizar Información
+                </button>
+              </form>
+            </div>
+            
+            <!-- Tab: Preferencias -->
+            <div class="tab-pane fade" id="preferencias">
+              <form id="preferencesForm" method="POST" action="/perfil/preferencias">
+                <div class="row">
+                  <div class="col-lg-6">
+                    <h5 class="mb-3">Notificaciones</h5>
+                    
+                    <div class="card bg-light mb-3">
+                      <div class="card-body">
+                        <div class="form-check form-switch mb-2">
+                          <input class="form-check-input" type="checkbox" id="emailVentas" name="emailVentas" {{ 'checked' if preferencias.email_ventas else '' }}>
+                          <label class="form-check-label" for="emailVentas">
+                            <strong>Notificaciones de Ventas</strong>
+                            <br><small class="text-muted">Recibir emails cuando se registre una nueva venta</small>
+                          </label>
+                        </div>
+                        
+                        <div class="form-check form-switch mb-2">
+                          <input class="form-check-input" type="checkbox" id="emailClientes" name="emailClientes" {{ 'checked' if preferencias.email_clientes else '' }}>
+                          <label class="form-check-label" for="emailClientes">
+                            <strong>Notificaciones de Clientes</strong>
+                            <br><small class="text-muted">Recibir emails sobre nuevos clientes y actualizaciones</small>
+                          </label>
+                        </div>
+                        
+                        <div class="form-check form-switch mb-2">
+                          <input class="form-check-input" type="checkbox" id="emailReportes" name="emailReportes" {{ 'checked' if preferencias.email_reportes else '' }}>
+                          <label class="form-check-label" for="emailReportes">
+                            <strong>Reportes Semanales</strong>
+                            <br><small class="text-muted">Recibir resúmenes semanales por email</small>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="col-lg-6">
+                    <h5 class="mb-3">Configuración Regional</h5>
+                    
+                    <div class="mb-3">
+                      <label for="timezone" class="form-label">Zona Horaria</label>
+                      <select class="form-select" id="timezone" name="timezone">
+                        <option value="America/Bogota" {{ 'selected' if preferencias.timezone == 'America/Bogota' else '' }}>Colombia (UTC-5)</option>
+                        <option value="America/Mexico_City" {{ 'selected' if preferencias.timezone == 'America/Mexico_City' else '' }}>México (UTC-6)</option>
+                        <option value="America/Lima" {{ 'selected' if preferencias.timezone == 'America/Lima' else '' }}>Perú (UTC-5)</option>
+                        <option value="America/Argentina/Buenos_Aires" {{ 'selected' if preferencias.timezone == 'America/Argentina/Buenos_Aires' else '' }}>Argentina (UTC-3)</option>
+                      </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="moneda" class="form-label">Moneda</label>
+                      <select class="form-select" id="moneda" name="moneda">
+                        <option value="COP" {{ 'selected' if preferencias.moneda == 'COP' else '' }}>Peso Colombiano (COP)</option>
+                        <option value="USD" {{ 'selected' if preferencias.moneda == 'USD' else '' }}>Dólar Estadounidense (USD)</option>
+                        <option value="EUR" {{ 'selected' if preferencias.moneda == 'EUR' else '' }}>Euro (EUR)</option>
+                        <option value="MXN" {{ 'selected' if preferencias.moneda == 'MXN' else '' }}>Peso Mexicano (MXN)</option>
+                      </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="idioma" class="form-label">Idioma</label>
+                      <select class="form-select" id="idioma" name="idioma">
+                        <option value="es" {{ 'selected' if preferencias.idioma == 'es' else '' }}>Español</option>
+                        <option value="en" {{ 'selected' if preferencias.idioma == 'en' else '' }}>English</option>
+                        <option value="pt" {{ 'selected' if preferencias.idioma == 'pt' else '' }}>Português</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-cog me-2"></i>Guardar Preferencias
+                </button>
+              </form>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para cambiar foto de perfil -->
+<div class="modal fade" id="profilePictureModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cambiar Foto de Perfil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3">
+          <img id="previewImage" src="" alt="Preview" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+        </div>
+        <input type="file" class="form-control" id="profilePictureInput" accept="image/*" onchange="previewProfilePicture(event)">
+        <small class="text-muted">Formatos soportados: JPG, PNG, GIF (máx. 2MB)</small>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="uploadProfilePicture()">Guardar Foto</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .profile-avatar {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .profile-avatar img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    cursor: pointer;
+  }
+  
+  .avatar-overlay:hover {
+    opacity: 1;
+  }
+  
+  .avatar-overlay i {
+    color: white;
+    font-size: 1.5rem;
+  }
+  
+  .password-strength {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+  }
+  
+  .strength-weak {
+    background-color: #fef2f2;
+    color: var(--danger-color);
+    border: 1px solid #fecaca;
+  }
+  
+  .strength-medium {
+    background-color: #fffbeb;
+    color: var(--warning-color);
+    border: 1px solid #fed7aa;
+  }
+  
+  .strength-strong {
+    background-color: #f0fdf4;
+    color: var(--success-color);
+    border: 1px solid #bbf7d0;
+  }
+  
+  .nav-tabs .nav-link {
+    border: none;
+    color: #6b7280;
+    font-weight: 500;
+  }
+  
+  .nav-tabs .nav-link.active {
+    background-color: transparent;
+    border-bottom: 2px solid var(--primary-color);
+    color: var(--primary-color);
+  }
+  
+  .nav-tabs .nav-link:hover {
+    border: none;
+    color: var(--primary-color);
+  }
+  
+  @media (max-width: 768px) {
+    .profile-avatar img {
+      width: 80px;
+      height: 80px;
+    }
+    
+    .nav-tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    
+    .nav-tabs .nav-link {
+      white-space: nowrap;
+      font-size: 0.875rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Toggle mostrar/ocultar contraseña
+  function togglePassword(fieldId) {
+    const passwordField = document.getElementById(fieldId);
+    const passwordIcon = document.getElementById(fieldId + 'Icon');
+    
+    if (passwordField.type === 'password') {
+      passwordField.type = 'text';
+      passwordIcon.className = 'fas fa-eye-slash text-muted';
+    } else {
+      passwordField.type = 'password';
+      passwordIcon.className = 'fas fa-eye text-muted';
+    }
+  }
+  
+  // Validar fortaleza de contraseña
+  function checkPasswordStrength(password) {
+    const strengthDiv = document.getElementById('newPasswordStrength');
+    if (!strengthDiv) return;
+    
+    let strength = 0;
+    let feedback = [];
+
+    if (password.length >= 8) strength++;
+    else feedback.push('Mínimo 8 caracteres');
+
+    if (/[a-z]/.test(password)) strength++;
+    else feedback.push('Una letra minúscula');
+
+    if (/[A-Z]/.test(password)) strength++;
+    else feedback.push('Una letra mayúscula');
+
+    if (/\d/.test(password)) strength++;
+    else feedback.push('Un número');
+
+    if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) strength++;
+    else feedback.push('Un carácter especial');
+
+    strengthDiv.style.display = password ? 'block' : 'none';
+
+    if (strength < 3) {
+      strengthDiv.className = 'password-strength strength-weak';
+      strengthDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>Débil - Faltan: ${feedback.join(', ')}`;
+    } else if (strength < 5) {
+      strengthDiv.className = 'password-strength strength-medium';
+      strengthDiv.innerHTML = `<i class="fas fa-shield-alt me-1"></i>Media - Considera agregar: ${feedback.join(', ')}`;
+    } else {
+      strengthDiv.className = 'password-strength strength-strong';
+      strengthDiv.innerHTML = `<i class="fas fa-check-circle me-1"></i>Fuerte - ¡Excelente contraseña!`;
+    }
+  }
+  
+  // Cambiar foto de perfil
+  function changeProfilePicture() {
+    const modal = new bootstrap.Modal(document.getElementById('profilePictureModal'));
+    const currentSrc = document.getElementById('profileImage').src;
+    document.getElementById('previewImage').src = currentSrc;
+    modal.show();
+  }
+  
+  function previewProfilePicture(event) {
+    const file = event.target.files[0];
+    if (file) {
+      // Validar tamaño (2MB máx)
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('El archivo es muy grande. Máximo 2MB permitido.', 'warning');
+        event.target.value = '';
+        return;
+      }
+      
+      // Validar tipo
+      if (!file.type.startsWith('image/')) {
+        showToast('Por favor selecciona un archivo de imagen válido.', 'warning');
+        event.target.value = '';
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('previewImage').src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  
+  function uploadProfilePicture() {
+    const fileInput = document.getElementById('profilePictureInput');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+      showToast('Por favor selecciona una imagen.', 'warning');
+      return;
+    }
+    
+    // PARA DESARROLLO: Simulación
+    setTimeout(() => {
+      document.getElementById('profileImage').src = document.getElementById('previewImage').src;
+      bootstrap.Modal.getInstance(document.getElementById('profilePictureModal')).hide();
+      showToast('Foto de perfil actualizada exitosamente!', 'success');
+    }, 1000);
+    
+    /* 
+    CÓDIGO PARA PRODUCCIÓN (descomenta cuando conectes con el backend):
+    
+    const formData = new FormData();
+    formData.append('profile_picture', file);
+    
+    fetch('/perfil/foto', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById('profileImage').src = data.new_image_url;
+        bootstrap.Modal.getInstance(document.getElementById('profilePictureModal')).hide();
+        showToast('Foto de perfil actualizada exitosamente!', 'success');
+      } else {
+        showToast(data.message || 'Error al subir la imagen', 'error');
+      }
+    })
+    .catch(error => {
+      showToast('Error al subir la imagen', 'error');
+      console.error('Error:', error);
+    });
+    */
+  }
+  
+  // Manejar formularios
+  document.getElementById('personalInfoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+    submitBtn.disabled = true;
+    
+    // PARA DESARROLLO: Simulación
+    setTimeout(() => {
+      showToast('Información personal actualizada exitosamente!', 'success');
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }, 1500);
+    
+    /* 
+    CÓDIGO PARA PRODUCCIÓN:
+    const formData = new FormData(this);
+    
+    fetch('/perfil/actualizar', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showToast('Información actualizada exitosamente!', 'success');
+      } else {
+        showToast(data.message || 'Error al actualizar', 'error');
+      }
+    })
+    .catch(error => {
+      showToast('Error de conexión', 'error');
+      console.error('Error:', error);
+    })
+    .finally(() => {
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    });
+    */
+  });
+  
+  document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmNewPassword').value;
+    
+    if (newPassword !== confirmPassword) {
+      showToast('Las contraseñas nuevas no coinciden', 'warning');
+      return;
+    }
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cambiando...';
+    submitBtn.disabled = true;
+    
+    // PARA DESARROLLO: Simulación
+    setTimeout(() => {
+      showToast('Contraseña cambiada exitosamente!', 'success');
+      this.reset();
+      document.getElementById('newPasswordStrength').style.display = 'none';
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }, 2000);
+    
+    /* CÓDIGO PARA PRODUCCIÓN: Igual que los otros formularios */
+  });
+  
+  document.getElementById('empresaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Actualizando...';
+    submitBtn.disabled = true;
+    
+    setTimeout(() => {
+      showToast('Información de empresa actualizada!', 'success');
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }, 1500);
+  });
+  
+  document.getElementById('preferencesForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+    submitBtn.disabled = true;
+    
+    setTimeout(() => {
+      showToast('Preferencias guardadas exitosamente!', 'success');
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }, 1500);
+  });
+  
+  // Validaciones en tiempo real
+  document.getElementById('newPassword')?.addEventListener('input', function() {
+    checkPasswordStrength(this.value);
+  });
+  
+  document.getElementById('confirmNewPassword')?.addEventListener('input', function() {
+    const newPassword = document.getElementById('newPassword').value;
+    if (this.value && newPassword !== this.value) {
+      this.classList.add('is-invalid');
+    } else {
+      this.classList.remove('is-invalid');
+    }
+  });
+  
+  // 2FA toggle
+  document.getElementById('enable2FA')?.addEventListener('change', function() {
+    if (this.checked) {
+      showToast('Funcionalidad de 2FA en desarrollo', 'info');
+      this.checked = false;
+    }
+  });
+  
+  // Cerrar sesiones
+  function cerrarSesion(sessionId) {
+    if (confirm('¿Estás seguro de que quieres cerrar esta sesión?')) {
+      showToast('Sesión cerrada exitosamente', 'success');
+    }
+  }
+  
+  function cerrarTodasSesiones() {
+    if (confirm('¿Estás seguro? Esto cerrará todas las sesiones activas excepto la actual.')) {
+      showToast('Todas las sesiones han sido cerradas', 'success');
+    }
+  }
+  
+  // Formatear teléfono
+  document.getElementById('telefono')?.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.startsWith('57')) {
+      value = value.substring(2);
+    }
+    if (value.length > 0) {
+      if (value.length <= 3) {
+        value = `+57 ${value}`;
+      } else if (value.length <= 6) {
+        value = `+57 ${value.substring(0, 3)} ${value.substring(3)}`;
+      } else {
+        value = `+57 ${value.substring(0, 3)} ${value.substring(3, 6)} ${value.substring(6, 10)}`;
+      }
+    }
+    e.target.value = value;
+  });
+</script>
+{% endblock %}

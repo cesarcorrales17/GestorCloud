@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta - GestorCloud</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary-color: #f8fafc;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-color: #f9fafb;
+            --border-color: #e5e7eb;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 0;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            max-width: 1000px;
+            width: 100%;
+            margin: 1rem;
+        }
+
+        .register-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .register-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .register-header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .register-form {
+            padding: 2rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            border-radius: 0.5rem;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-secondary {
+            color: var(--dark-color);
+            border-color: var(--border-color);
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--secondary-color);
+            border-color: var(--border-color);
+        }
+
+        .alert {
+            border: none;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .password-strength {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        .strength-weak {
+            background-color: #fef2f2;
+            color: var(--danger-color);
+            border: 1px solid #fecaca;
+        }
+
+        .strength-medium {
+            background-color: #fffbeb;
+            color: var(--warning-color);
+            border: 1px solid #fed7aa;
+        }
+
+        .strength-strong {
+            background-color: #f0fdf4;
+            color: var(--success-color);
+            border: 1px solid #bbf7d0;
+        }
+
+        .terms-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .terms-text a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .terms-text a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .register-container {
+                margin: 0.5rem;
+            }
+            
+            .register-header, .register-form {
+                padding: 1.5rem;
+            }
+            
+            .register-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .is-invalid {
+            border-color: var(--danger-color);
+        }
+
+        .is-valid {
+            border-color: var(--success-color);
+        }
+
+        .invalid-feedback, .valid-feedback {
+            display: block;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .invalid-feedback {
+            color: var(--danger-color);
+        }
+
+        .valid-feedback {
+            color: var(--success-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container fade-in">
+        <!-- Header -->
+        <div class="register-header">
+            <h1><i class="fas fa-cloud me-2"></i>GestorCloud</h1>
+            <p>Crea tu cuenta y comienza a gestionar tu negocio hoy</p>
+        </div>
+
+        <!-- Register Form -->
+        <div class="register-form">
+            <form id="registerForm" method="POST" action="/registro">
+                <div class="row">
+                    <div class="col-12">
+                        <h3 class="mb-4 text-center">Crear Cuenta Nueva</h3>
+                        
+                        <!-- Alert para mensajes -->
+                        <div id="alertContainer"></div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nombre" class="form-label">
+                                    <i class="fas fa-user me-1"></i>
+                                    Nombre Completo *
+                                </label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required placeholder="Juan Pérez">
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="empresa" class="form-label">
+                                    <i class="fas fa-building me-1"></i>
+                                    Nombre de la Empresa
+                                </label>
+                                <input type="text" class="form-control" id="empresa" name="empresa" placeholder="Mi Empresa S.A.S">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope me-1"></i>
+                                    Correo Electrónico *
+                                </label>
+                                <input type="email" class="form-control" id="email" name="email" required placeholder="usuario@ejemplo.com">
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="telefono" class="form-label">
+                                    <i class="fas fa-phone me-1"></i>
+                                    Teléfono
+                                </label>
+                                <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="+57 300 123 4567">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>
+                                    Contraseña *
+                                </label>
+                                <div class="position-relative">
+                                    <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
+                                    <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-2" onclick="togglePassword('password')">
+                                        <i id="passwordIcon" class="fas fa-eye text-muted"></i>
+                                    </button>
+                                </div>
+                                <div id="passwordStrength" class="password-strength" style="display: none;"></div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="confirmPassword" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>
+                                    Confirmar Contraseña *
+                                </label>
+                                <div class="position-relative">
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required placeholder="••••••••">
+                                    <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-2" onclick="togglePassword('confirmPassword')">
+                                        <i id="confirmPasswordIcon" class="fas fa-eye text-muted"></i>
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tipoNegocio" class="form-label">
+                                <i class="fas fa-store me-1"></i>
+                                Tipo de Negocio
+                            </label>
+                            <select class="form-select" id="tipoNegocio" name="tipoNegocio">
+                                <option value="">Selecciona una opción</option>
+                                <option value="retail">Retail / Tienda</option>
+                                <option value="servicios">Servicios</option>
+                                <option value="restaurante">Restaurante</option>
+                                <option value="tecnologia">Tecnología</option>
+                                <option value="salud">Salud</option>
+                                <option value="educacion">Educación</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="aceptoTerminos" name="aceptoTerminos" required>
+                                <label class="form-check-label terms-text" for="aceptoTerminos">
+                                    Acepto los <a href="/terminos" target="_blank">Términos y Condiciones</a> y la 
+                                    <a href="/privacidad" target="_blank">Política de Privacidad</a> de GestorCloud
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="recibirNoticias" name="recibirNoticias">
+                                <label class="form-check-label terms-text" for="recibirNoticias">
+                                    Quiero recibir noticias y actualizaciones de GestorCloud
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Crear Mi Cuenta
+                        </button>
+
+                        <div class="text-center">
+                            <p class="mb-2 text-muted">¿Ya tienes una cuenta?</p>
+                            <a href="/login" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Iniciar Sesión
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Toggle mostrar/ocultar contraseña
+        function togglePassword(fieldId) {
+            const passwordField = document.getElementById(fieldId);
+            const passwordIcon = document.getElementById(fieldId + 'Icon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                passwordIcon.className = 'fas fa-eye-slash text-muted';
+            } else {
+                passwordField.type = 'password';
+                passwordIcon.className = 'fas fa-eye text-muted';
+            }
+        }
+
+        // Mostrar alertas
+        function showAlert(message, type = 'danger') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alert);
+            
+            // Auto-ocultar después de 5 segundos
+            setTimeout(() => {
+                if (alert && alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Validar fortaleza de contraseña
+        function checkPasswordStrength(password) {
+            const strengthDiv = document.getElementById('passwordStrength');
+            let strength = 0;
+            let feedback = [];
+
+            if (password.length >= 8) strength++;
+            else feedback.push('Mínimo 8 caracteres');
+
+            if (/[a-z]/.test(password)) strength++;
+            else feedback.push('Una letra minúscula');
+
+            if (/[A-Z]/.test(password)) strength++;
+            else feedback.push('Una letra mayúscula');
+
+            if (/\d/.test(password)) strength++;
+            else feedback.push('Un número');
+
+            if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) strength++;
+            else feedback.push('Un carácter especial');
+
+            strengthDiv.style.display = password ? 'block' : 'none';
+
+            if (strength < 3) {
+                strengthDiv.className = 'password-strength strength-weak';
+                strengthDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>Débil - Faltan: ${feedback.join(', ')}`;
+                return 'weak';
+            } else if (strength < 5) {
+                strengthDiv.className = 'password-strength strength-medium';
+                strengthDiv.innerHTML = `<i class="fas fa-shield-alt me-1"></i>Media - Considera agregar: ${feedback.join(', ')}`;
+                return 'medium';
+            } else {
+                strengthDiv.className = 'password-strength strength-strong';
+                strengthDiv.innerHTML = `<i class="fas fa-check-circle me-1"></i>Fuerte - ¡Excelente contraseña!`;
+                return 'strong';
+            }
+        }
+
+        // Validaciones en tiempo real
+        document.getElementById('nombre').addEventListener('blur', function() {
+            const nombre = this.value.trim();
+            if (nombre.length < 2) {
+                this.classList.add('is-invalid');
+                this.nextElementSibling.textContent = 'El nombre debe tener al menos 2 caracteres';
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+                this.nextElementSibling.textContent = '';
+            }
+        });
+
+        document.getElementById('email').addEventListener('blur', function() {
+            const email = this.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                this.classList.add('is-invalid');
+                this.nextElementSibling.textContent = 'Ingresa un email válido';
+            } else if (email) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+                this.nextElementSibling.textContent = '';
+            }
+        });
+
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strength = checkPasswordStrength(password);
+            
+            if (password.length > 0 && strength === 'weak') {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else if (password.length > 0) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+            
+            // Validar confirmación de contraseña también
+            const confirmPassword = document.getElementById('confirmPassword');
+            if (confirmPassword.value) {
+                validatePasswordMatch();
+            }
+        });
+
+        document.getElementById('confirmPassword').addEventListener('input', validatePasswordMatch);
+
+        function validatePasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword');
+            const confirmValue = confirmPassword.value;
+            
+            if (confirmValue && password !== confirmValue) {
+                confirmPassword.classList.add('is-invalid');
+                confirmPassword.classList.remove('is-valid');
+                confirmPassword.nextElementSibling.textContent = 'Las contraseñas no coinciden';
+            } else if (confirmValue) {
+                confirmPassword.classList.remove('is-invalid');
+                confirmPassword.classList.add('is-valid');
+                confirmPassword.nextElementSibling.textContent = '';
+            }
+        }
+
+        // Manejo del formulario de registro
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Validar que las contraseñas coincidan
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showAlert('Las contraseñas no coinciden', 'danger');
+                return;
+            }
+            
+            // Validar términos y condiciones
+            if (!document.getElementById('aceptoTerminos').checked) {
+                showAlert('Debes aceptar los términos y condiciones', 'warning');
+                return;
+            }
+            
+            // Mostrar loading
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creando cuenta...';
+            submitBtn.disabled = true;
+            
+            // PARA DESARROLLO: Simulación de registro exitoso
+            setTimeout(() => {
+                showAlert('¡Cuenta creada exitosamente! Redirigiendo...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+            
+            /* 
+            CÓDIGO PARA PRODUCCIÓN (descomenta cuando conectes con el backend):
+            
+            const formData = new FormData(this);
+            
+            fetch('/registro', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('¡Cuenta creada exitosamente! Redirigiendo...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                } else {
+                    showAlert(data.message || 'Error al crear la cuenta', 'danger');
+                }
+            })
+            .catch(error => {
+                showAlert('Error de conexión. Por favor, intenta nuevamente.', 'danger');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+            */
+        });
+
+        // Formatear número de teléfono
+        document.getElementById('telefono').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.startsWith('57')) {
+                value = value.substring(2);
+            }
+            if (value.length > 0) {
+                if (value.length <= 3) {
+                    value = `+57 ${value}`;
+                } else if (value.length <= 6) {
+                    value = `+57 ${value.substring(0, 3)} ${value.substring(3)}`;
+                } else {
+                    value = `+57 ${value.substring(0, 3)} ${value.substring(3, 6)} ${value.substring(6, 10)}`;
+                }
+            }
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>
