@@ -35,7 +35,8 @@ class GestorCloudDB:
             user=self.db_user,
             password=self.db_password,
             host=self.db_host,
-            port=self.db_port
+            port=self.db_port,
+            client_encoding='utf8'
         )
     
     def _crear_tablas(self):
