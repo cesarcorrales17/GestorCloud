@@ -94,7 +94,7 @@
   <div class="row">
     <!-- Distribución de Clientes -->
     <div class="col-lg-6 mb-4">
-      <div class="card h-100">
+      <div class="card">
         <div
           class="card-header d-flex justify-content-between align-items-center"
         >
@@ -105,7 +105,7 @@
           <span class="badge bg-primary">{{ stats.total_clientes }} Total</span>
         </div>
         <div class="card-body">
-          <canvas id="clientesChart" width="400" height="200"></canvas>
+          <canvas id="clientesChart" width="400" height="120"></canvas>
 
           <!-- Leyenda -->
           <div class="mt-3">
@@ -132,7 +132,7 @@
 
     <!-- Top Clientes -->
     <div class="col-lg-6 mb-4">
-      <div class="card h-100">
+      <div class="card">
         <div
           class="card-header d-flex justify-content-between align-items-center"
         >
@@ -301,6 +301,12 @@
     justify-content: center;
     color: white;
     font-size: 0.875rem;
+  }
+
+  /* Altura fija para el gráfico */
+  #clientesChart {
+    max-height: 200px !important;
+    height: 200px !important;
   }
 
   .timeline {
