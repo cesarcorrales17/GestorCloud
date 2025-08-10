@@ -1,309 +1,365 @@
-{% extends "base.html" %}
-
-{% block title %}Ventas - GestorCloud{% endblock %}
-
-{% block page_title %}Gestión de Ventas{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Ventas - GestorCloud{% endblock %} {%
+block page_title %}Gestión de Ventas{% endblock %} {% block content %}
 <div class="container-fluid">
-    <!-- Encabezado con botones de acción -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <p class="text-muted mb-0">
-                <i class="fas fa-shopping-cart"></i>
-                Administra todas las ventas y transacciones de tu negocio.
-            </p>
-        </div>
-        <div class="col-md-6 text-end">
-            <a href="/ventas/nueva" class="btn btn-primary btn-lg">
-                <i class="fas fa-plus"></i> Nueva Venta
-            </a>
-            <button class="btn btn-outline-success" onclick="exportarVentas()">
-                <i class="fas fa-file-excel"></i> Exportar
-            </button>
-        </div>
+  <!-- Encabezado con botones de acción -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <p class="text-muted mb-0">
+        <i class="fas fa-shopping-cart"></i>
+        Administra todas las ventas y transacciones de tu negocio.
+      </p>
     </div>
-
-    <!-- Estadísticas rápidas -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="stats-card primary">
-                <div class="stats-number">{{ stats.total_ventas or 0 }}</div>
-                <div class="stats-label">Total Ventas</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card success">
-                <div class="stats-number">${{ "{:,.0f}".format(stats.ingresos_mes or 0) }}</div>
-                <div class="stats-label">Ingresos del Mes</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card warning">
-                <div class="stats-number">{{ stats.ventas_mes or 0 }}</div>
-                <div class="stats-label">Ventas del Mes</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card danger">
-                <div class="stats-number">${{ "{:,.0f}".format(stats.promedio_venta or 0) }}</div>
-                <div class="stats-label">Promedio por Venta</div>
-            </div>
-        </div>
+    <div class="col-md-6 text-end">
+      <a href="/ventas/nueva" class="btn btn-primary btn-lg">
+        <i class="fas fa-plus"></i> Nueva Venta
+      </a>
+      <button class="btn btn-outline-success" onclick="exportarVentas()">
+        <i class="fas fa-file-excel"></i> Exportar
+      </button>
     </div>
+  </div>
 
-    <!-- Filtros y búsqueda -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="search-container">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" class="form-control search-input" 
-                               placeholder="Buscar por cliente, productos..." 
-                               data-target="table tbody tr">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" id="filtroMetodoPago" onchange="filtrarVentas()">
-                        <option value="">Todos los métodos</option>
-                        <option value="Efectivo">Efectivo</option>
-                        <option value="Tarjeta Crédito">Tarjeta Crédito</option>
-                        <option value="Tarjeta Débito">Tarjeta Débito</option>
-                        <option value="Transferencia">Transferencia</option>
-                        <option value="Nequi">Nequi</option>
-                        <option value="Daviplata">Daviplata</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <input type="date" class="form-control" id="fechaDesde" onchange="filtrarVentas()">
-                </div>
-                <div class="col-md-2">
-                    <input type="date" class="form-control" id="fechaHasta" onchange="filtrarVentas()">
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
-                        <i class="fas fa-times"></i> Limpiar
-                    </button>
-                </div>
-            </div>
-        </div>
+  <!-- Estadísticas rápidas -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="stats-card primary">
+        <div class="stats-number">{{ stats.total_ventas or 0 }}</div>
+        <div class="stats-label">Total Ventas</div>
+      </div>
     </div>
-
-    <!-- Lista de ventas -->
-    <div class="card">
-        <div class="card-header">
-            <h4 class="mb-0">
-                <i class="fas fa-list"></i> Lista de Ventas
-                <span class="badge bg-primary ms-2">{{ ventas|length }} ventas</span>
-            </h4>
+    <div class="col-md-3">
+      <div class="stats-card success">
+        <div class="stats-number">
+          ${{ "{:,.0f}".format(stats.ingresos_mes or 0) }}
         </div>
-        <div class="card-body p-0">
-            {% if ventas %}
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Fecha</th>
-                            <th>Cliente</th>
-                            <th>Productos</th>
-                            <th>Valor Total</th>
-                            <th>Método de Pago</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for venta in ventas %}
-                        <tr data-metodo="{{ venta.metodo_pago }}" data-fecha="{{ venta.fecha_venta }}">
-                            <td>
-                                <strong>#{{ venta.id_venta }}</strong>
-                            </td>
-                            <td>
-                                <div>{{ venta.fecha_venta }}</div>
-                                <small class="text-muted">{{ venta.hora_venta }}</small>
-                            </td>
-                            <td>
-                                <div>
-                                    <strong>{{ venta.cliente.nombre_completo if venta.cliente else 'Cliente eliminado' }}</strong>
-                                    {% if venta.cliente %}
-                                    <br><small class="text-muted">{{ venta.cliente.correo }}</small>
-                                    {% if venta.cliente.categoria == 'VIP' %}
-                                    <span class="badge success ms-1">VIP</span>
-                                    {% endif %}
-                                    {% endif %}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="productos-cell">
-                                    {{ venta.productos[:50] }}{% if venta.productos|length > 50 %}...{% endif %}
-                                    {% if venta.productos|length > 50 %}
-                                    <button class="btn btn-sm btn-link p-0" onclick="mostrarProductos('{{ venta.productos|e }}')">
-                                        Ver más
-                                    </button>
-                                    {% endif %}
-                                </div>
-                            </td>
-                            <td>
-                                <strong class="text-success">${{ "{:,.0f}".format(venta.valor_total) }}</strong>
-                                {% if venta.descuento_aplicado > 0 %}
-                                <br><small class="text-warning">
-                                    <i class="fas fa-tag"></i> Desc: {{ venta.descuento_aplicado }}%
-                                </small>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge {{ 'success' if venta.metodo_pago == 'Efectivo' else 'primary' }}">
-                                    {{ venta.metodo_pago }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge success">Completada</span>
-                            </td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="verDetalleVenta({{ venta.id }})" title="Ver detalle">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <a href="/ventas/{{ venta.id }}/editar" class="btn btn-sm btn-outline-warning" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarVenta({{ venta.id }})" title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="text-center py-5">
-                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                <h4 class="text-muted">No hay ventas registradas</h4>
-                <p class="text-muted mb-4">Comienza registrando tu primera venta</p>
-                <a href="/ventas/nueva" class="btn btn-primary btn-lg">
-                    <i class="fas fa-plus"></i> Registrar Primera Venta
-                </a>
-            </div>
-            {% endif %}
-        </div>
+        <div class="stats-label">Ingresos del Mes</div>
+      </div>
     </div>
+    <div class="col-md-3">
+      <div class="stats-card warning">
+        <div class="stats-number">{{ stats.ventas_mes or 0 }}</div>
+        <div class="stats-label">Ventas del Mes</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card danger">
+        <div class="stats-number">
+          ${{ "{:,.0f}".format(stats.promedio_venta or 0) }}
+        </div>
+        <div class="stats-label">Promedio por Venta</div>
+      </div>
+    </div>
+  </div>
 
-    <!-- Paginación (si es necesaria) -->
-    {% if ventas|length > 20 %}
-    <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-            <li class="page-item"><a class="page-link" href="#">Anterior</a></li>
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
-        </ul>
-    </nav>
-    {% endif %}
+  <!-- Filtros y búsqueda -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input
+              type="text"
+              class="form-control search-input"
+              placeholder="Buscar por cliente, productos..."
+              data-target="table tbody tr"
+            />
+          </div>
+        </div>
+        <div class="col-md-2">
+          <select
+            class="form-select"
+            id="filtroMetodoPago"
+            onchange="filtrarVentas()"
+          >
+            <option value="">Todos los métodos</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Tarjeta Crédito">Tarjeta Crédito</option>
+            <option value="Tarjeta Débito">Tarjeta Débito</option>
+            <option value="Transferencia">Transferencia</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <input
+            type="date"
+            class="form-control"
+            id="fechaDesde"
+            onchange="filtrarVentas()"
+          />
+        </div>
+        <div class="col-md-2">
+          <input
+            type="date"
+            class="form-control"
+            id="fechaHasta"
+            onchange="filtrarVentas()"
+          />
+        </div>
+        <div class="col-md-2">
+          <button
+            class="btn btn-outline-secondary w-100"
+            onclick="limpiarFiltros()"
+          >
+            <i class="fas fa-times"></i> Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de ventas -->
+  <div class="card">
+    <div class="card-header">
+      <h4 class="mb-0">
+        <i class="fas fa-list"></i> Lista de Ventas
+        <span class="badge bg-primary ms-2">{{ ventas|length }} ventas</span>
+      </h4>
+    </div>
+    <div class="card-body p-0">
+      {% if ventas %}
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Productos</th>
+              <th>Valor Total</th>
+              <th>Método de Pago</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for venta in ventas %}
+            <tr
+              data-metodo="{{ venta.metodo_pago }}"
+              data-fecha="{{ venta.fecha_venta }}"
+            >
+              <td>
+                <strong>#{{ venta.id_venta }}</strong>
+              </td>
+              <td>
+                <div>{{ venta.fecha_venta }}</div>
+                <small class="text-muted">{{ venta.hora_venta }}</small>
+              </td>
+              <td>
+                <div>
+                  <strong
+                    >{{ venta.cliente.nombre_completo if venta.cliente else
+                    'Cliente eliminado' }}</strong
+                  >
+                  {% if venta.cliente %}
+                  <br /><small class="text-muted"
+                    >{{ venta.cliente.correo }}</small
+                  >
+                  {% if venta.cliente.categoria == 'VIP' %}
+                  <span class="badge success ms-1">VIP</span>
+                  {% endif %} {% endif %}
+                </div>
+              </td>
+              <td>
+                <div class="productos-cell">
+                  {{ venta.productos[:50] }}{% if venta.productos|length > 50
+                  %}...{% endif %} {% if venta.productos|length > 50 %}
+                  <button
+                    class="btn btn-sm btn-link p-0"
+                    onclick="mostrarProductos('{{ venta.productos|e }}')"
+                  >
+                    Ver más
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                <strong class="text-success"
+                  >${{ "{:,.0f}".format(venta.valor_total) }}</strong
+                >
+                {% if venta.descuento_aplicado > 0 %}
+                <br /><small class="text-warning">
+                  <i class="fas fa-tag"></i> Desc: {{ venta.descuento_aplicado
+                  }}%
+                </small>
+                {% endif %}
+              </td>
+              <td>
+                <span
+                  class="badge {{ 'success' if venta.metodo_pago == 'Efectivo' else 'primary' }}"
+                >
+                  {{ venta.metodo_pago }}
+                </span>
+              </td>
+              <td>
+                <span class="badge success">Completada</span>
+              </td>
+              <td>
+                <div class="btn-group" role="group">
+                  <button
+                    class="btn btn-sm btn-outline-primary"
+                    onclick="verDetalleVenta({{ venta.id }})"
+                    title="Ver detalle"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <a
+                    href="/ventas/{{ venta.id }}/editar"
+                    class="btn btn-sm btn-outline-warning"
+                    title="Editar"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <button
+                    class="btn btn-sm btn-outline-danger"
+                    onclick="eliminarVenta({{ venta.id }})"
+                    title="Eliminar"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">No hay ventas registradas</h4>
+        <p class="text-muted mb-4">Comienza registrando tu primera venta</p>
+        <a href="/ventas/nueva" class="btn btn-primary btn-lg">
+          <i class="fas fa-plus"></i> Registrar Primera Venta
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Paginación (si es necesaria) -->
+  {% if ventas|length > 20 %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      <li class="page-item"><a class="page-link" href="#">Anterior</a></li>
+      <li class="page-item active"><a class="page-link" href="#">1</a></li>
+      <li class="page-item"><a class="page-link" href="#">2</a></li>
+      <li class="page-item"><a class="page-link" href="#">3</a></li>
+      <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
+    </ul>
+  </nav>
+  {% endif %}
 </div>
 
 <!-- Modal para ver productos completos -->
 <div class="modal fade" id="productosModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Productos de la Venta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p id="productosCompletos"></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Productos de la Venta</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p id="productosCompletos"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Modal para detalle de venta -->
 <div class="modal fade" id="detalleVentaModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Detalle de Venta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="detalleVentaContent">
-                <!-- Contenido cargado dinámicamente -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="imprimirVenta()">
-                    <i class="fas fa-print"></i> Imprimir
-                </button>
-            </div>
-        </div>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle de Venta</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body" id="detalleVentaContent">
+        <!-- Contenido cargado dinámicamente -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+        <button type="button" class="btn btn-primary" onclick="imprimirVenta()">
+          <i class="fas fa-print"></i> Imprimir
+        </button>
+      </div>
     </div>
+  </div>
 </div>
 
 <script>
-// Funciones específicas para ventas
-function filtrarVentas() {
-    const metodo = document.getElementById('filtroMetodoPago').value;
-    const fechaDesde = document.getElementById('fechaDesde').value;
-    const fechaHasta = document.getElementById('fechaHasta').value;
-    const rows = document.querySelectorAll('table tbody tr');
-    
-    rows.forEach(row => {
-        let mostrar = true;
-        
-        // Filtro por método de pago
-        if (metodo && row.getAttribute('data-metodo') !== metodo) {
-            mostrar = false;
-        }
-        
-        // Filtro por fecha
-        const fechaVenta = row.getAttribute('data-fecha');
-        if (fechaDesde && fechaVenta < fechaDesde) {
-            mostrar = false;
-        }
-        if (fechaHasta && fechaVenta > fechaHasta) {
-            mostrar = false;
-        }
-        
-        row.style.display = mostrar ? '' : 'none';
+  // Funciones específicas para ventas
+  function filtrarVentas() {
+    const metodo = document.getElementById("filtroMetodoPago").value;
+    const fechaDesde = document.getElementById("fechaDesde").value;
+    const fechaHasta = document.getElementById("fechaHasta").value;
+    const rows = document.querySelectorAll("table tbody tr");
+
+    rows.forEach((row) => {
+      let mostrar = true;
+
+      // Filtro por método de pago
+      if (metodo && row.getAttribute("data-metodo") !== metodo) {
+        mostrar = false;
+      }
+
+      // Filtro por fecha
+      const fechaVenta = row.getAttribute("data-fecha");
+      if (fechaDesde && fechaVenta < fechaDesde) {
+        mostrar = false;
+      }
+      if (fechaHasta && fechaVenta > fechaHasta) {
+        mostrar = false;
+      }
+
+      row.style.display = mostrar ? "" : "none";
     });
-}
+  }
 
-function limpiarFiltros() {
-    document.getElementById('filtroMetodoPago').value = '';
-    document.getElementById('fechaDesde').value = '';
-    document.getElementById('fechaHasta').value = '';
-    document.querySelector('.search-input').value = '';
-    
-    const rows = document.querySelectorAll('table tbody tr');
-    rows.forEach(row => row.style.display = '');
-}
+  function limpiarFiltros() {
+    document.getElementById("filtroMetodoPago").value = "";
+    document.getElementById("fechaDesde").value = "";
+    document.getElementById("fechaHasta").value = "";
+    document.querySelector(".search-input").value = "";
 
-function mostrarProductos(productos) {
-    document.getElementById('productosCompletos').textContent = productos;
-    new bootstrap.Modal(document.getElementById('productosModal')).show();
-}
+    const rows = document.querySelectorAll("table tbody tr");
+    rows.forEach((row) => (row.style.display = ""));
+  }
 
-function verDetalleVenta(ventaId) {
+  function mostrarProductos(productos) {
+    document.getElementById("productosCompletos").textContent = productos;
+    new bootstrap.Modal(document.getElementById("productosModal")).show();
+  }
+
+  function verDetalleVenta(ventaId) {
     // Aquí harías una petición AJAX para obtener el detalle
-    document.getElementById('detalleVentaContent').innerHTML = `
+    document.getElementById("detalleVentaContent").innerHTML = `
         <div class="text-center">
             <div class="spinner-border" role="status">
                 <span class="visually-hidden">Cargando...</span>
             </div>
         </div>
     `;
-    
-    new bootstrap.Modal(document.getElementById('detalleVentaModal')).show();
-    
+
+    new bootstrap.Modal(document.getElementById("detalleVentaModal")).show();
+
     // Simular carga de datos
     setTimeout(() => {
-        document.getElementById('detalleVentaContent').innerHTML = `
+      document.getElementById("detalleVentaContent").innerHTML = `
             <div class="row">
                 <div class="col-md-6">
                     <h6>Información de la Venta</h6>
@@ -319,24 +375,24 @@ function verDetalleVenta(ventaId) {
             </div>
         `;
     }, 1000);
-}
+  }
 
-function eliminarVenta(ventaId) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta venta?')) {
-        // Aquí harías la petición para eliminar
-        GestorCloud.showNotification('Venta eliminada correctamente', 'success');
-        // Recargar la página o eliminar la fila
-        setTimeout(() => location.reload(), 1500);
+  function eliminarVenta(ventaId) {
+    if (confirm("¿Estás seguro de que deseas eliminar esta venta?")) {
+      // Aquí harías la petición para eliminar
+      GestorCloud.showNotification("Venta eliminada correctamente", "success");
+      // Recargar la página o eliminar la fila
+      setTimeout(() => location.reload(), 1500);
     }
-}
+  }
 
-function exportarVentas() {
-    GestorCloud.showNotification('Exportando ventas...', 'info');
+  function exportarVentas() {
+    GestorCloud.showNotification("Exportando ventas...", "info");
     // Aquí implementarías la lógica de exportación
-}
+  }
 
-function imprimirVenta() {
+  function imprimirVenta() {
     window.print();
-}
+  }
 </script>
 {% endblock %}

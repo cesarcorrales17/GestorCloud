@@ -86,7 +86,7 @@ class GestorCloudDB:
                         hora_venta TIME NOT NULL,
                         productos TEXT NOT NULL,
                         valor_total DECIMAL(12,2) NOT NULL,
-                        descuento_aplicado DECIMAL(4,2) DEFAULT 0.0,
+                        descuento_aplicado DECIMAL(12,2) DEFAULT 0.0,
                         metodo_pago TEXT DEFAULT 'Efectivo',
                         vendedor TEXT DEFAULT '',
                         notas_venta TEXT DEFAULT '',
@@ -111,6 +111,9 @@ class GestorCloudDB:
             with conn.cursor() as cursor:
                 
                 try:
+                    # Convertir fecha vacía a None para PostgreSQL
+                    ultima_compra_db = cliente.ultima_compra if cliente.ultima_compra else None
+                    
                     cursor.execute("""
                         INSERT INTO clientes (
                             nombre_completo, edad, direccion, correo, telefono,
@@ -124,7 +127,7 @@ class GestorCloudDB:
                         cliente.categoria, cliente.estado, cliente.fecha_registro,
                         cliente.ultima_actualizacion, cliente.notas,
                         cliente.valor_total_compras, cliente.numero_compras,
-                        cliente.ultima_compra, cliente.descuento_cliente
+                        ultima_compra_db, cliente.descuento_cliente
                     ))
                     
                     cliente_id = cursor.fetchone()[0]
@@ -179,6 +182,9 @@ class GestorCloudDB:
                 
                 cliente.actualizar_timestamp()
                 
+                # Convertir fecha vacía a None para PostgreSQL
+                ultima_compra_db = cliente.ultima_compra if cliente.ultima_compra else None
+                
                 cursor.execute("""
                     UPDATE clientes SET
                         nombre_completo = %s, edad = %s, direccion = %s, correo = %s,
@@ -191,7 +197,7 @@ class GestorCloudDB:
                     cliente.correo, cliente.telefono, cliente.empresa,
                     cliente.categoria, cliente.estado, cliente.ultima_actualizacion,
                     cliente.notas, cliente.valor_total_compras, cliente.numero_compras,
-                    cliente.ultima_compra, cliente.descuento_cliente, cliente.id_cliente
+                    ultima_compra_db, cliente.descuento_cliente, cliente.id_cliente
                 ))
                 
                 conn.commit()
@@ -214,33 +220,69 @@ class GestorCloudDB:
     # === OPERACIONES CON VENTAS ===
     
     def agregar_venta(self, venta: Venta) -> int:
-        """Agrega una nueva venta y actualiza el cliente"""
+        """Agrega una nueva venta y actualiza el cliente - CON TRANSACCIÓN SEGURA"""
         with self._get_connection() as conn:
-            with conn.cursor() as cursor:
-                
-                # Insertar venta
-                cursor.execute("""
-                    INSERT INTO ventas (
-                        id_cliente, fecha_venta, hora_venta, productos,
-                        valor_total, descuento_aplicado, metodo_pago, vendedor, notas_venta
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    RETURNING id_venta
-                """, (
-                    venta.id_cliente, venta.fecha_venta, venta.hora_venta,
-                    venta.productos, venta.valor_total, venta.descuento_aplicado,
-                    venta.metodo_pago, venta.vendedor, venta.notas_venta
-                ))
-                
-                venta_id = cursor.fetchone()[0]
-                
-                # Actualizar cliente
-                cliente = self.obtener_cliente(venta.id_cliente)
-                if cliente:
-                    cliente.agregar_compra(venta.valor_total)
-                    self.actualizar_cliente(cliente)
-                
-                conn.commit()
-                return venta_id
+            try:
+                with conn.cursor() as cursor:
+                    
+                    # Verificar que el cliente existe ANTES de insertar
+                    cursor.execute("SELECT id_cliente FROM clientes WHERE id_cliente = %s", (venta.id_cliente,))
+                    if not cursor.fetchone():
+                        raise ValueError(f"Cliente con ID {venta.id_cliente} no existe")
+                    
+                    # Insertar venta
+                    cursor.execute("""
+                        INSERT INTO ventas (
+                            id_cliente, fecha_venta, hora_venta, productos,
+                            valor_total, descuento_aplicado, metodo_pago, vendedor, notas_venta
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id_venta
+                    """, (
+                        venta.id_cliente, venta.fecha_venta, venta.hora_venta,
+                        venta.productos, venta.valor_total, venta.descuento_aplicado,
+                        venta.metodo_pago, venta.vendedor, venta.notas_venta
+                    ))
+                    
+                    venta_id = cursor.fetchone()[0]
+                    
+                    # Actualizar estadísticas del cliente
+                    cursor.execute("""
+                        UPDATE clientes SET
+                            valor_total_compras = valor_total_compras + %s,
+                            numero_compras = numero_compras + 1,
+                            ultima_compra = %s,
+                            ultima_actualizacion = %s,
+                            categoria = CASE 
+                                WHEN (valor_total_compras + %s) >= 1000000 AND categoria != 'VIP' 
+                                THEN 'VIP'
+                                ELSE categoria
+                            END,
+                            descuento_cliente = CASE 
+                                WHEN (valor_total_compras + %s) >= 1000000 AND categoria != 'VIP' 
+                                THEN 0.05
+                                ELSE descuento_cliente
+                            END
+                        WHERE id_cliente = %s
+                    """, (
+                        venta.valor_total, venta.fecha_venta, 
+                        datetime.now().strftime("%Y-%m-%d %H:%M"),
+                        venta.valor_total, venta.valor_total, venta.id_cliente
+                    ))
+                    
+                    # Verificar que se actualizó el cliente
+                    if cursor.rowcount == 0:
+                        raise ValueError("Error actualizando las estadísticas del cliente")
+                    
+                    # Todo salió bien, confirmar transacción
+                    conn.commit()
+                    return venta_id
+                    
+            except psycopg2.Error as e:
+                conn.rollback()
+                raise Exception(f"Error de base de datos: {e}")
+            except Exception as e:
+                conn.rollback()
+                raise Exception(f"Error procesando venta: {e}")
     
     def obtener_ventas_cliente(self, id_cliente: int) -> List[Venta]:
         """Obtiene todas las ventas de un cliente"""
@@ -255,102 +297,6 @@ class GestorCloudDB:
                 rows = cursor.fetchall()
                 return [self._row_to_venta(row) for row in rows]
     
-    # === ESTADÍSTICAS Y REPORTES ===
-    
-    def obtener_estadisticas_generales(self) -> dict:
-        """Obtiene estadísticas generales del negocio"""
-        with self._get_connection() as conn:
-            with conn.cursor() as cursor:
-                
-                # Total clientes
-                cursor.execute("SELECT COUNT(*) FROM clientes WHERE estado = 'Activo'")
-                total_clientes = cursor.fetchone()[0]
-                
-                # Total ventas del mes actual
-                mes_actual = datetime.now().strftime("%Y-%m")
-                cursor.execute("""
-                    SELECT COUNT(*), COALESCE(SUM(valor_total), 0) 
-                    FROM ventas 
-                    WHERE TO_CHAR(fecha_venta, 'YYYY-MM') = %s
-                """, (mes_actual,))
-                
-                ventas_mes, ingresos_mes = cursor.fetchone()
-                
-                # Clientes VIP
-                cursor.execute("SELECT COUNT(*) FROM clientes WHERE categoria = 'VIP'")
-                clientes_vip = cursor.fetchone()[0]
-                
-                # Top 5 clientes por valor
-                cursor.execute("""
-                    SELECT nombre_completo, valor_total_compras 
-                    FROM clientes 
-                    WHERE estado = 'Activo'
-                    ORDER BY valor_total_compras DESC 
-                    LIMIT 5
-                """)
-                top_clientes = cursor.fetchall()
-                
-                return {
-                    'total_clientes': total_clientes,
-                    'ventas_mes': ventas_mes or 0,
-                    'ingresos_mes': float(ingresos_mes or 0),
-                    'clientes_vip': clientes_vip,
-                    'top_clientes': top_clientes
-                }
-    
-    def obtener_clientes_por_categoria(self) -> dict:
-        """Obtiene conteo de clientes por categoría"""
-        with self._get_connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("""
-                    SELECT categoria, COUNT(*) 
-                    FROM clientes 
-                    WHERE estado = 'Activo'
-                    GROUP BY categoria
-                """)
-                
-                return dict(cursor.fetchall())
-    
-    # === MÉTODOS AUXILIARES ===
-    
-    def _row_to_cliente(self, row) -> Cliente:
-        """Convierte una fila de DB a objeto Cliente"""
-        cliente = Cliente(
-            nombre_completo=row['nombre_completo'],
-            edad=row['edad'],
-            direccion=row['direccion'],
-            correo=row['correo'],
-            telefono=row['telefono'],
-            empresa=row['empresa'],
-            categoria=row['categoria'],
-            estado=row['estado'],
-            fecha_registro=str(row['fecha_registro']),
-            ultima_actualizacion=str(row['ultima_actualizacion']),
-            notas=row['notas'],
-            valor_total_compras=float(row['valor_total_compras']) if row['valor_total_compras'] else 0.0,
-            numero_compras=row['numero_compras'],
-            ultima_compra=str(row['ultima_compra']) if row['ultima_compra'] else '',
-            descuento_cliente=float(row['descuento_cliente']) if row['descuento_cliente'] else 0.0
-        )
-        cliente.id_cliente = row['id_cliente']
-        return cliente
-    
-    def _row_to_venta(self, row) -> Venta:
-        """Convierte una fila de DB a objeto Venta"""
-        venta = Venta(
-            id_cliente=row['id_cliente'],
-            fecha_venta=str(row['fecha_venta']),
-            hora_venta=str(row['hora_venta']),
-            productos=row['productos'],
-            valor_total=float(row['valor_total']),
-            descuento_aplicado=float(row['descuento_aplicado']),
-            metodo_pago=row['metodo_pago'],
-            vendedor=row['vendedor'],
-            notas_venta=row['notas_venta']
-        )
-        venta.id_venta = row['id_venta']
-        return venta
-        
     def obtener_todas_ventas(self) -> List[Venta]:
         """Obtiene todas las ventas registradas en el sistema"""
         with self._get_connection() as conn:
@@ -467,3 +413,99 @@ class GestorCloudDB:
                     ventas.append(venta)
                     
                 return ventas
+
+    # === ESTADÍSTICAS Y REPORTES ===
+    
+    def obtener_estadisticas_generales(self) -> dict:
+        """Obtiene estadísticas generales del negocio"""
+        with self._get_connection() as conn:
+            with conn.cursor() as cursor:
+                
+                # Total clientes
+                cursor.execute("SELECT COUNT(*) FROM clientes WHERE estado = 'Activo'")
+                total_clientes = cursor.fetchone()[0]
+                
+                # Total ventas del mes actual
+                mes_actual = datetime.now().strftime("%Y-%m")
+                cursor.execute("""
+                    SELECT COUNT(*), COALESCE(SUM(valor_total), 0) 
+                    FROM ventas 
+                    WHERE TO_CHAR(fecha_venta, 'YYYY-MM') = %s
+                """, (mes_actual,))
+                
+                ventas_mes, ingresos_mes = cursor.fetchone()
+                
+                # Clientes VIP
+                cursor.execute("SELECT COUNT(*) FROM clientes WHERE categoria = 'VIP'")
+                clientes_vip = cursor.fetchone()[0]
+                
+                # Top 5 clientes por valor
+                cursor.execute("""
+                    SELECT nombre_completo, valor_total_compras 
+                    FROM clientes 
+                    WHERE estado = 'Activo'
+                    ORDER BY valor_total_compras DESC 
+                    LIMIT 5
+                """)
+                top_clientes = cursor.fetchall()
+                
+                return {
+                    'total_clientes': total_clientes,
+                    'ventas_mes': ventas_mes or 0,
+                    'ingresos_mes': float(ingresos_mes or 0),
+                    'clientes_vip': clientes_vip,
+                    'top_clientes': top_clientes
+                }
+    
+    def obtener_clientes_por_categoria(self) -> dict:
+        """Obtiene conteo de clientes por categoría"""
+        with self._get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT categoria, COUNT(*) 
+                    FROM clientes 
+                    WHERE estado = 'Activo'
+                    GROUP BY categoria
+                """)
+                
+                return dict(cursor.fetchall())
+    
+    # === MÉTODOS AUXILIARES ===
+    
+    def _row_to_cliente(self, row) -> Cliente:
+        """Convierte una fila de DB a objeto Cliente"""
+        cliente = Cliente(
+            nombre_completo=row['nombre_completo'],
+            edad=row['edad'],
+            direccion=row['direccion'],
+            correo=row['correo'],
+            telefono=row['telefono'],
+            empresa=row['empresa'],
+            categoria=row['categoria'],
+            estado=row['estado'],
+            fecha_registro=str(row['fecha_registro']),
+            ultima_actualizacion=str(row['ultima_actualizacion']),
+            notas=row['notas'],
+            valor_total_compras=float(row['valor_total_compras']) if row['valor_total_compras'] else 0.0,
+            numero_compras=row['numero_compras'],
+            ultima_compra=str(row['ultima_compra']) if row['ultima_compra'] else '',
+            descuento_cliente=float(row['descuento_cliente']) if row['descuento_cliente'] else 0.0
+        )
+        cliente.id_cliente = row['id_cliente']
+        return cliente
+    
+    def _row_to_venta(self, row) -> Venta:
+        """Convierte una fila de DB a objeto Venta"""
+        venta = Venta(
+            id_cliente=row['id_cliente'],
+            fecha_venta=str(row['fecha_venta']),
+            hora_venta=str(row['hora_venta']),
+            productos=row['productos'],
+            valor_total=float(row['valor_total']),
+            descuento_aplicado=float(row['descuento_aplicado']),
+            metodo_pago=row['metodo_pago'],
+            vendedor=row['vendedor'],
+            notas_venta=row['notas_venta']
+        )
+        venta.id_venta = row['id_venta']
+        return venta

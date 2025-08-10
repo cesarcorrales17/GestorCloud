@@ -28,7 +28,7 @@ class Cliente:
     notas: str = ""
     valor_total_compras: float = 0.0
     numero_compras: int = 0
-    ultima_compra: str = ""
+    ultima_compra: Optional[str] = None  # Cambiado de "" a None para PostgreSQL
     descuento_cliente: float = 0.0
     
     def __post_init__(self):
@@ -149,4 +149,4 @@ class Venta:
 # Constantes para categorías y estados
 CATEGORIAS_CLIENTE = ["Prospecto", "Regular", "VIP", "Inactivo"]
 ESTADOS_CLIENTE = ["Activo", "Inactivo", "Prospecto"]
-METODOS_PAGO = ["Efectivo", "Tarjeta Débito", "Tarjeta Crédito", "Transferencia", "Nequi", "Daviplata"]
+METODOS_PAGO = ["Efectivo", "Tarjeta Débito", "Tarjeta Crédito", "Transferencia"]

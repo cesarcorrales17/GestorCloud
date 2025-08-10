@@ -1,202 +1,384 @@
-{% extends "base.html" %}
-
-{% block title %}Nueva Venta - GestorCloud{% endblock %}
-
-{% block page_title %}Registrar Nueva Venta{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Nueva Venta - GestorCloud{% endblock
+%} {% block page_title %}Registrar Nueva Venta{% endblock %} {% block content %}
 <div class="container-fluid">
-    <!-- Formulario de Venta -->
-    <div class="card">
-        <div class="card-header">
-            <h4 class="mb-0"><i class="fas fa-shopping-cart"></i> Detalles de la Venta</h4>
-        </div>
-        <div class="card-body">
-            <form id="ventaForm" method="post" action="/api/ventas">
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label for="id_cliente" class="form-label">Cliente <span class="text-danger">*</span></label>
-                        <select class="form-select" id="id_cliente" name="id_cliente" required>
-                            <option value="">Seleccionar cliente...</option>
-                            {% for cliente in clientes %}
-                            <option value="{{ cliente.id_cliente }}">{{ cliente.nombre_completo }} {% if cliente.empresa %}({{ cliente.empresa }}){% endif %}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="client-info border rounded p-3 mt-4" id="clienteInfo" style="display:none;">
-                            <div id="clienteNombre" class="fs-5 fw-bold"></div>
-                            <div id="clienteCorreo" class="text-muted small"></div>
-                            <div class="mt-2">
-                                <span id="clienteCategoria" class="badge bg-secondary me-2"></span>
-                                <span id="clienteDescuento" class="badge bg-success"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <label for="productos" class="form-label">Productos/Servicios <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="productos" name="productos" rows="3" required 
-                                placeholder="Detalla los productos o servicios incluidos en esta venta..."></textarea>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <label for="valor_total" class="form-label">Valor Total <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input type="number" class="form-control" id="valor_total" name="valor_total" min="1000" step="1000" required>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="descuento_aplicado" class="form-label">Descuento (%)</label>
-                        <input type="number" class="form-control" id="descuento_aplicado" name="descuento_aplicado" min="0" max="100" value="0" step="0.1">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="metodo_pago" class="form-label">Método de Pago <span class="text-danger">*</span></label>
-                        <select class="form-select" id="metodo_pago" name="metodo_pago" required>
-                            {% for metodo in metodos_pago %}
-                            <option value="{{ metodo }}">{{ metodo }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label for="vendedor" class="form-label">Vendedor</label>
-                        <input type="text" class="form-control" id="vendedor" name="vendedor">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="notas_venta" class="form-label">Notas Adicionales</label>
-                        <textarea class="form-control" id="notas_venta" name="notas_venta" rows="1" 
-                                placeholder="Observaciones o detalles adicionales..."></textarea>
-                    </div>
-                </div>
-
-                <hr>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <a href="/ventas" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left"></i> Cancelar
-                        </a>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <button type="submit" class="btn btn-success btn-lg" id="btnRegistrarVenta">
-                            <i class="fas fa-check"></i> Registrar Venta
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
+  <!-- Formulario de Venta -->
+  <div class="card">
+    <div class="card-header">
+      <h4 class="mb-0">
+        <i class="fas fa-shopping-cart"></i> Detalles de la Venta
+      </h4>
     </div>
+    <div class="card-body">
+      <form id="ventaForm" method="post" action="/api/ventas">
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <label for="id_cliente" class="form-label"
+              >Cliente <span class="text-danger">*</span></label
+            >
+            <select
+              class="form-select"
+              id="id_cliente"
+              name="id_cliente"
+              required
+            >
+              <option value="">Seleccionar cliente...</option>
+              {% for cliente in clientes %}
+              <option value="{{ cliente.id_cliente }}">
+                {{ cliente.nombre_completo }} {% if cliente.empresa %}({{
+                cliente.empresa }}){% endif %}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <div
+              class="client-info border rounded p-3 mt-4"
+              id="clienteInfo"
+              style="display: none"
+            >
+              <div id="clienteNombre" class="fs-5 fw-bold"></div>
+              <div id="clienteCorreo" class="text-muted small"></div>
+              <div class="mt-2">
+                <span
+                  id="clienteCategoria"
+                  class="badge bg-secondary me-2"
+                ></span>
+                <span id="clienteDescuento" class="badge bg-success"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-12">
+            <label for="productos" class="form-label"
+              >Productos/Servicios <span class="text-danger">*</span></label
+            >
+            <textarea
+              class="form-control"
+              id="productos"
+              name="productos"
+              rows="3"
+              required
+              placeholder="Detalla los productos o servicios incluidos en esta venta..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <label for="valor_total" class="form-label"
+              >Valor Total <span class="text-danger">*</span></label
+            >
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input
+                type="number"
+                class="form-control"
+                id="valor_total"
+                name="valor_total"
+                min="1000"
+                step="1000"
+                required
+              />
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label for="descuento_aplicado" class="form-label"
+              >Descuento (%)</label
+            >
+            <div class="input-group">
+              <input
+                type="number"
+                class="form-control"
+                id="descuento_aplicado"
+                name="descuento_aplicado"
+                min="0"
+                max="100"
+                value="0"
+                step="0.1"
+              />
+              <span class="input-group-text">%</span>
+            </div>
+            <div id="descuento_preview" class="form-text"></div>
+          </div>
+          <div class="col-md-4">
+            <label for="metodo_pago" class="form-label"
+              >Método de Pago <span class="text-danger">*</span></label
+            >
+            <select
+              class="form-select"
+              id="metodo_pago"
+              name="metodo_pago"
+              required
+            >
+              {% for metodo in metodos_pago %}
+              <option value="{{ metodo }}">{{ metodo }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <label for="vendedor" class="form-label">Vendedor</label>
+            <input
+              type="text"
+              class="form-control"
+              id="vendedor"
+              name="vendedor"
+            />
+          </div>
+          <div class="col-md-6">
+            <label for="notas_venta" class="form-label"
+              >Notas Adicionales</label
+            >
+            <textarea
+              class="form-control"
+              id="notas_venta"
+              name="notas_venta"
+              rows="1"
+              placeholder="Observaciones o detalles adicionales..."
+            ></textarea>
+          </div>
+        </div>
+
+        <hr />
+
+        <div class="row">
+          <div class="col-md-6">
+            <a href="/ventas" class="btn btn-outline-secondary">
+              <i class="fas fa-arrow-left"></i> Cancelar
+            </a>
+          </div>
+          <div class="col-md-6 text-end">
+            <button
+              type="submit"
+              class="btn btn-success btn-lg"
+              id="btnRegistrarVenta"
+            >
+              <i class="fas fa-check"></i> Registrar Venta
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('ventaForm');
-    const clienteSelect = document.getElementById('id_cliente');
-    const clienteInfo = document.getElementById('clienteInfo');
-    const clienteNombre = document.getElementById('clienteNombre');
-    const clienteCorreo = document.getElementById('clienteCorreo');
-    const clienteCategoria = document.getElementById('clienteCategoria');
-    const clienteDescuento = document.getElementById('clienteDescuento');
-    const descuentoInput = document.getElementById('descuento_aplicado');
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("ventaForm");
+    const clienteSelect = document.getElementById("id_cliente");
+    const clienteInfo = document.getElementById("clienteInfo");
+    const clienteNombre = document.getElementById("clienteNombre");
+    const clienteCorreo = document.getElementById("clienteCorreo");
+    const clienteCategoria = document.getElementById("clienteCategoria");
+    const clienteDescuento = document.getElementById("clienteDescuento");
+    const descuentoInput = document.getElementById("descuento_aplicado");
+    const valorTotalInput = document.getElementById("valor_total");
+    const descuentoPreview = document.getElementById("descuento_preview");
 
     // Mostrar información del cliente al seleccionarlo
-    clienteSelect.addEventListener('change', function() {
-        if (this.value) {
-            // En un caso real, haríamos una petición al servidor
-            // Para simplificar, obtenemos el texto seleccionado
+    clienteSelect.addEventListener("change", function () {
+      if (this.value) {
+        // Obtener información del cliente del servidor
+        fetch(`/api/clientes/${this.value}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Error obteniendo datos del cliente");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            clienteNombre.textContent = data.nombre_completo;
+            clienteCorreo.textContent = data.correo;
+            clienteCategoria.textContent = data.categoria;
+
+            // Si es VIP, mostrar su descuento automáticamente
+            if (data.categoria === "VIP" && data.descuento_cliente > 0) {
+              clienteCategoria.className = "badge bg-warning me-2";
+              clienteDescuento.textContent = `${(
+                data.descuento_cliente * 100
+              ).toFixed(0)}% Descuento VIP`;
+              clienteDescuento.className = "badge bg-success";
+              descuentoInput.value = (data.descuento_cliente * 100).toFixed(1);
+            } else {
+              clienteCategoria.className = "badge bg-secondary me-2";
+              clienteDescuento.textContent = "Sin descuento";
+              clienteDescuento.className = "badge bg-light text-dark";
+              descuentoInput.value = 0;
+            }
+
+            clienteInfo.style.display = "block";
+            updateDescuentoPreview();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            // Mostrar info básica del select como fallback
             const selectedOption = this.options[this.selectedIndex];
-            const clienteNombreText = selectedOption.text;
-            
-            // Mostrar la información del cliente (simulado)
-            clienteNombre.textContent = clienteNombreText;
-            clienteCorreo.textContent = "correo@cliente.com"; // Esto en realidad vendría del servidor
-            clienteCategoria.textContent = "Regular";  // Esto vendría del servidor
-            clienteDescuento.textContent = "0% Descuento"; // Esto vendría del servidor
-            
-            // Mostrar el panel de información
-            clienteInfo.style.display = 'block';
-            
-            // Aquí se haría una petición AJAX para obtener datos completos del cliente
-            // Por ejemplo:
-            /*
-            fetch(`/api/clientes/${this.value}`)
-                .then(response => response.json())
-                .then(data => {
-                    clienteNombre.textContent = data.nombre_completo;
-                    clienteCorreo.textContent = data.correo;
-                    clienteCategoria.textContent = data.categoria;
-                    
-                    // Si es VIP, mostrar su descuento automáticamente
-                    if (data.categoria === 'VIP') {
-                        clienteCategoria.classList.add('bg-warning');
-                        clienteCategoria.classList.remove('bg-secondary');
-                        clienteDescuento.textContent = `${data.descuento_cliente * 100}% Descuento`;
-                        descuentoInput.value = data.descuento_cliente * 100;
-                    }
-                    
-                    clienteInfo.style.display = 'block';
-                });
-            */
-        } else {
-            clienteInfo.style.display = 'none';
-        }
+            clienteNombre.textContent = selectedOption.text;
+            clienteCorreo.textContent = "Información no disponible";
+            clienteCategoria.textContent = "Regular";
+            clienteCategoria.className = "badge bg-secondary me-2";
+            clienteDescuento.textContent = "Sin descuento";
+            clienteInfo.style.display = "block";
+          });
+      } else {
+        clienteInfo.style.display = "none";
+        descuentoInput.value = 0;
+        updateDescuentoPreview();
+      }
     });
 
-    // Envío del formulario
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        const submitButton = document.getElementById('btnRegistrarVenta');
-        const originalButtonText = submitButton.innerHTML;
-        
-        // Mostrar loading
-        submitButton.innerHTML = '<span class="spinner me-2"></span>Procesando...';
-        submitButton.disabled = true;
-        
-        // Enviar formulario mediante fetch
-        fetch('/api/ventas', {
-            method: 'POST',
-            body: formData
+    // Validación en tiempo real del descuento
+    descuentoInput.addEventListener("input", function () {
+      const valor = parseFloat(this.value) || 0;
+      if (valor < 0) this.value = 0;
+      if (valor > 100) this.value = 100;
+      updateDescuentoPreview();
+    });
+
+    valorTotalInput.addEventListener("input", updateDescuentoPreview);
+
+    function updateDescuentoPreview() {
+      const valorTotal = parseFloat(valorTotalInput.value) || 0;
+      const descuentoPorcentaje = parseFloat(descuentoInput.value) || 0;
+
+      if (valorTotal > 0 && descuentoPorcentaje > 0) {
+        const descuentoValor = (descuentoPorcentaje / 100) * valorTotal;
+        const total = valorTotal - descuentoValor;
+        descuentoPreview.innerHTML = `Descuento: <strong>$${descuentoValor.toLocaleString()}</strong> | Total a pagar: <strong>$${total.toLocaleString()}</strong>`;
+        descuentoPreview.className = "form-text text-success";
+      } else {
+        descuentoPreview.innerHTML = "";
+      }
+    }
+
+    // Envío del formulario con manejo de errores mejorado
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const submitButton = document.getElementById("btnRegistrarVenta");
+      const originalButtonText = submitButton.innerHTML;
+
+      // Validaciones adicionales en el frontend
+      const valorTotal = parseFloat(formData.get("valor_total"));
+      const descuento = parseFloat(formData.get("descuento_aplicado"));
+
+      if (valorTotal <= 0) {
+        showToast("El valor total debe ser mayor a 0", "error");
+        return;
+      }
+
+      if (descuento < 0 || descuento > 100) {
+        showToast("El descuento debe estar entre 0% y 100%", "error");
+        return;
+      }
+
+      if (!formData.get("id_cliente")) {
+        showToast("Debe seleccionar un cliente", "error");
+        return;
+      }
+
+      // Mostrar loading
+      submitButton.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+      submitButton.disabled = true;
+
+      // Enviar formulario mediante fetch con timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 segundos timeout
+
+      fetch("/api/ventas", {
+        method: "POST",
+        body: formData,
+        signal: controller.signal,
+      })
+        .then((response) => {
+          clearTimeout(timeoutId);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Mostrar mensaje de éxito
-                showToast('Venta registrada exitosamente', 'success');
-                
-                // Redireccionar después de 1 segundo
-                setTimeout(() => {
-                    window.location.href = '/ventas';
-                }, 1000);
-            } else {
-                // Mostrar error
-                showToast(data.message || 'Error al registrar venta', 'error');
-                submitButton.innerHTML = originalButtonText;
-                submitButton.disabled = false;
-            }
+        .then((data) => {
+          if (data.success) {
+            // Mostrar mensaje de éxito con más detalles
+            const valorFinal = data.valor_final || valorTotal;
+            showToast(
+              `¡Venta registrada! Total: ${valorFinal.toLocaleString()}`,
+              "success"
+            );
+
+            // Redireccionar después de 1.5 segundos
+            setTimeout(() => {
+              window.location.href = "/ventas";
+            }, 1500);
+          } else {
+            // Mostrar error específico
+            showToast(data.message || "Error al registrar venta", "error");
+            resetButton();
+          }
         })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Error al conectar con el servidor', 'error');
-            submitButton.innerHTML = originalButtonText;
-            submitButton.disabled = false;
+        .catch((error) => {
+          clearTimeout(timeoutId);
+          console.error("Error completo:", error);
+
+          if (error.name === "AbortError") {
+            showToast(
+              "La operación tardó demasiado. Verifique su conexión.",
+              "error"
+            );
+          } else {
+            showToast("Error de conexión con el servidor", "error");
+          }
+          resetButton();
         });
+
+      function resetButton() {
+        submitButton.innerHTML = originalButtonText;
+        submitButton.disabled = false;
+      }
     });
 
     function showToast(message, type) {
-        // Usar la función global definida en base.html
-        window.showToast?.(message, type) || 
-            alert(message); // Fallback si la función global no está definida
+      // Usar la función global definida en base.html o crear una simple
+      if (typeof window.showToast === "function") {
+        window.showToast(message, type);
+      } else {
+        // Fallback simple
+        const alertClass =
+          type === "success" ? "alert-success" : "alert-danger";
+        const alertDiv = document.createElement("div");
+        alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText =
+          "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+        alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+            `;
+        document.body.appendChild(alertDiv);
+
+        // Auto-remove después de 5 segundos
+        setTimeout(() => {
+          if (alertDiv.parentElement) {
+            alertDiv.remove();
+          }
+        }, 5000);
+      }
     }
-});
+
+    // Agregar endpoint para obtener información del cliente
+    window.obtenerInfoCliente = function (clienteId) {
+      return fetch(`/api/clientes/${clienteId}`)
+        .then((response) => response.json())
+        .catch((error) => {
+          console.error("Error obteniendo cliente:", error);
+          return null;
+        });
+    };
+  });
 </script>
 {% endblock %}
